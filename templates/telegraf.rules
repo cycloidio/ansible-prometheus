@@ -1,0 +1,331 @@
+groups:
+#
+# System
+#
+- name: telegraf.rules
+  rules:
+  #
+  # System
+  #
+  - alert: CPUUsage
+    expr: (100 - cpu_usage_idle{cpu="cpu-total"}) > 90
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{$labels.instance}}: CPU usage is above 90% (current value is: {{ $value }})'
+      summary: '{{$labels.instance}}: High CPU usage detected'
+    {% endraw %}
+
+  - alert: MemoryUsage
+    expr: (100 - mem_available_percent) > 90
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{$labels.instance}}: Memory usage is above 90% (current value is: {{ $value }})'
+      summary: '{{$labels.instance}}: High memory usage detected'
+    {% endraw %}
+
+  - alert: LoadAverage
+    expr: (system_load5 / system_n_cpus) > 2.5
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{$labels.instance}}: LoadAverage is high (current value is: {{ $value }} per cpu)'
+      summary: '{{$labels.instance}}: High LoadAverage detected'
+    {% endraw %}
+
+  - alert: LowDiskSpace
+    expr: disk_used_percent > 90
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{$labels.instance}}: {{$labels.path}} disk usage is above 90% (current value is: {{ $value }})'
+      summary: '{{$labels.instance}}: Low disk space'
+    {% endraw %}
+
+  - alert: LowDiskInodes
+    expr: ((disk_inodes_used / disk_inodes_total) * 100) > 90
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{$labels.instance}}: {{$labels.path}} disk inodes is above 90% (current value is: {{ $value }})'
+      summary: '{{$labels.instance}}: Low disk inodes'
+    {% endraw %}
+
+  # Do not raise down alarm for preprod and dev instances
+  - alert: InstanceDown
+    expr: up{env !~ "dev|preprod|staging"} == 0
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - {{ $labels.Name }} has been down for more than 5 minutes.'
+      summary: 'Instance {{ $labels.instance }} down'
+    {% endraw %}
+
+  #
+  # Http
+  #
+  - alert: HttpResponseCode
+    expr: http_response_http_response_code > 302
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - {{ $labels.server }} return code > 302 for more than 5 minutes.'
+      summary: 'Instance {{ $labels.instance }} return code {{ $value }} > 302'
+    {% endraw %}
+
+  - alert: HttpResponseStringMatch
+    expr: http_response_response_string_match == 0
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - {{ $labels.server }} not able to match the requested string for more than 5 minutes.'
+      summary: 'Instance {{ $labels.instance }} - {{ $labels.server }} pattern not found'
+    {% endraw %}
+
+  # Using min_over_time https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation-_over_time
+  # As we run this check only every 30min, there is some hole in the graph.
+  # So we are taking the min value to have enough data for the alert. Keeping in mind that this alert should
+  # Change value only once a day. Having a 1h step is ok.
+  - alert: LbCertsExpireCheck
+    expr: min_over_time(aws_lb_certs_expire_days[1h]) < 30
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - cert {{ $labels.cert }} for {{ $labels.cert_cn }} will expire in {{ $value }} days.'
+      summary: 'Instance {{ $labels.instance }} - found cert {{ $labels.cert_cn }} will expire in {{ $value }} days'
+    {% endraw %}
+
+  #
+  # Mongodb
+  #
+#  # TODO migrate this on mongodb_db_stats.
+#  # For now Telegraf from debian too old to enable gather_db_stats https://github.com/influxdata/telegraf/blob/master/plugins/inputs/mongodb/README.md
+#  - alert: MongodbOk
+#    expr: mongodb_ok == 0
+#    for: 5m
+#    labels:
+#      {% raw -%}
+#      customer: '{{ $labels.client }}'
+#      project: '{{ $labels.project }}'
+#      env: '{{ $labels.env }}'
+#      {% endraw -%}
+#      severity: critical
+#      receiver: on_call
+#    annotations:
+#    {%- raw %}
+#      description: '{{ $labels.instance }} - Mongodb not ok for more than 5 minutes.'
+#      summary: 'Instance {{ $labels.instance }} Ko'
+#    {% endraw %}
+
+  #
+  # Amazon SES
+  #
+  - alert: SesSentQuota
+    expr: ( sum (aws_ses_quota{type="sent"}) without (type) / sum (aws_ses_quota{type="max"}) without (type) ) * 100 > 90
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - SES sent {{ $value }}% quota used.'
+      summary: '{{ $labels.instance }} - SES sent {{ $value }}% quota used.'
+    {% endraw %}
+
+  - alert: SesReputation
+    expr: (aws_ses_reputation{type="bounces"} or aws_ses_reputation{type="complaints"}) > 10
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - SES {{ $labels.type }} reputation is {{ $value }}.'
+      summary: '{{ $labels.instance }} - SES {{ $labels.type }} reputation is {{ $value }}.'
+    {% endraw %}
+
+  #
+  # Amazon CPUCredit
+  #
+  - alert: EC2CpuCreditBalance
+    expr: cloudwatch_aws_ec2_cpu_credit_balance_average < 30
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - Aws RDS {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
+      summary: '{{ $labels.instance }} - Aws RDS {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
+    {% endraw %}
+
+  - alert: RDSCpuCreditBalance
+    expr: cloudwatch_aws_rds_cpu_credit_balance_average < 30
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - Aws RDS {{ $labels.db_instance_identifier }} CPU Credit Balance low {{ $value }}.'
+      summary: '{{ $labels.instance }} - Aws RDS {{ $labels.db_instance_identifier }} CPU Credit Balance low {{ $value }}.'
+    {% endraw %}
+
+  #
+  # Amazon Events
+  #
+  - alert: EC2Events
+    expr: aws_ec2_instance_events > 0
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: warning
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
+      summary: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
+    {% endraw %}
+
+  - alert: RDSEvents
+    expr: aws_rds_instance_events > 0
+    for: 5m
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: warning
+      receiver: on_call
+    annotations:
+    {%- raw %}
+      description: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
+      summary: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
+    {% endraw %}
+
+
+## This alarm should always ring to trigger a curl on opsgenie heartbeat
+#- name: opsgenie.rules
+#  rules:
+#  - alert: opsgenie heartbeat
+#    expr: absent(absent(prometheus_build_info == 1))
+#    labels:
+#      env: "{{ env }}"
+#      severity: critical
+#      receiver: opsgenie_heartbeat
+#    annotations:
+#      description: 'Test if prometheus and alert manager still working'
+#      summary: 'Prometheus and alertmanager service working'

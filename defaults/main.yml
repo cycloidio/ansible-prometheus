@@ -29,8 +29,10 @@ prometheus_commandline_args:
   storage.tsdb.path: "/prometheus-data/data"
 prometheus_image: "prom/prometheus"
 
-prometheus_rule_files:
-  - '/prometheus-data/alert.rules'
+# Fileglobs loop format
+# http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
+prometheus_rule_files: []
+
 # See https://prometheus.io/docs/operating/configuration/#<scrape_config>
 prometheus_scrape_configs:
 - job_name: 'prometheus'

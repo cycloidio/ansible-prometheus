@@ -39,3 +39,14 @@
   notify:
     - "{{ prometheus_restart_handler }}"
   when: default_alert_rules == true
+
+- name: copy prometheus rules
+  template: >
+    src="{{ item }}"
+    dest="{{ path }}/prometheus-data/{{ item | basename }}.rules"
+    owner=root
+    group=nogroup
+    mode=0640
+  with_fileglob: "{{ prometheus_rule_files }}"
+  notify:
+    - "{{ prometheus_restart_handler }}"

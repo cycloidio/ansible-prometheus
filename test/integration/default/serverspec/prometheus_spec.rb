@@ -4,10 +4,17 @@ require data_file if File.file? data_file
 
 describe 'Prometheus' do
 
-  %w(/srv /srv/prometheus-data /srv/alertmanager ).each do |dir|
+  %w(/srv /srv/alertmanager ).each do |dir|
     describe file(dir) do
       it { should be_directory }
       it { should be_owned_by('root') }
+    end
+  end
+
+  %w(/srv/prometheus-data ).each do |dir|
+    describe file(dir) do
+      it { should be_directory }
+      it { should be_owned_by('nobody') }
     end
   end
 
@@ -31,7 +38,12 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
     -   targets:
-        - 10.0.2.15:9100"
+        - 10.0.2.15:9100
+alerting:
+  alertmanagers:
+  -   scheme: http
+      static_configs:
+      -   targets:"
 
     it { should be_file }
     it { should contain(prometheus_content) }
@@ -39,7 +51,7 @@ scrape_configs:
 
   describe file('/srv/prometheus-data/alert.rules') do
     it { should be_file }
-    its(:content) { should match /ALERT InstanceDown/ }
+    its(:content) { should match /alert: InstanceDown/ }
   end
 
   describe file('/srv/alertmanager/alertmanager.yml') do

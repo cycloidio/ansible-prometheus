@@ -7,9 +7,9 @@ global:
     {{ key }}: {{ prometheus_external_labels[key] }}
 {% endfor %}
 {% endif %}
-{% if default_alert_rules %}
+{% if default_alert_rules or prometheus_rule_files %}
 rule_files:
-{{ prometheus_rule_files | to_json | from_json | to_nice_yaml }}
+- /prometheus-data/*.rules
 {% endif %}
 scrape_configs:
 {{ prometheus_scrape_configs | to_json | from_json | to_nice_yaml( width=50, explicit_start=False, explicit_end=False) }}
