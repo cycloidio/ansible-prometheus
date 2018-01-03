@@ -33,6 +33,11 @@ prometheus_image: "prom/prometheus"
 # http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
 prometheus_rule_files: []
 
+# Telegraf rules
+prometheus_telegraf_rules_config: {}
+#  receiver: slack
+
+
 # See https://prometheus.io/docs/operating/configuration/#<scrape_config>
 prometheus_scrape_configs:
 - job_name: 'prometheus'
