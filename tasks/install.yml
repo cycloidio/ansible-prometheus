@@ -4,8 +4,13 @@
     pkg={{item}}
     state=installed
   with_items:
-    - python-pip
+    - python-setuptools
     - jq
+  when: ansible_os_family == "Debian"
+
+- name: easy_install deps (Ubuntu)
+  easy_install:
+    name: pip
   when: ansible_os_family == "Debian"
 
 - name: install deps (RHEL)
