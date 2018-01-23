@@ -43,7 +43,7 @@
 - name: copy prometheus rules
   template: >
     src="{{ item }}"
-    dest="{{ path }}/prometheus-data/{{ item | basename }}.rules"
+    dest="{{ path }}/prometheus-data/{{ item | basename }}"
     owner=root
     group=nogroup
     mode=0640

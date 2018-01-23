@@ -11,6 +11,14 @@
       - 9093:9093
     restart_policy: always
 
+- name: Ensure alertmanager templates directory exist
+  file: >
+    path="{{ path }}/alertmanager/template"
+    owner=nobody
+    group=nogroup
+    mode=0740
+    state=directory
+
 - name: copy alertmanager config file
   template: >
     src=templates/alertmanager.yml.j2
@@ -18,5 +26,16 @@
     owner=root
     group=root
     mode=0640
+  notify:
+    - "{{ alertmanager_restart_handler }}"
+
+- name: copy alertmanager templates
+  copy: >
+    src="{{ item }}"
+    dest="{{ path }}/alertmanager/template/{{ item | basename }}"
+    owner=root
+    group=nogroup
+    mode=0640
+  with_fileglob: "{{ alertmanager_template_files }}"
   notify:
     - "{{ alertmanager_restart_handler }}"
