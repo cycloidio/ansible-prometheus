@@ -11,7 +11,7 @@
       - 9093:9093
     restart_policy: always
 
-- name: copy prometheus config file
+- name: copy alertmanager config file
   template: >
     src=templates/alertmanager.yml.j2
     dest="{{ path }}/alertmanager/alertmanager.yml"
