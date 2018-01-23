@@ -2,9 +2,9 @@
 - name: Create alertmanager container
   docker_container:
     name: alertmanager
-    command: -config.file=/alertmanager/alertmanager.yml
+    command: "{% for key in alertmanager_commandline_args %}--{{key}}={{alertmanager_commandline_args[key]}} {% endfor %}"
     hostname: "{{ alertmanager_hostname }}"
-    image: prom/alertmanager
+    image: "{{ alertmanager_image }}"
     volumes:
       - "{{ path }}/alertmanager:/alertmanager"
     published_ports:

@@ -29,6 +29,10 @@ prometheus_commandline_args:
   storage.tsdb.path: "/prometheus-data/data"
 prometheus_image: "prom/prometheus"
 
+alertmanager_commandline_args:
+  config.file: "/alertmanager/alertmanager.yml"
+alertmanager_image: "prom/alertmanager"
+
 # Fileglobs loop format
 # http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
 prometheus_rule_files: []
