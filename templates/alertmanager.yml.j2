@@ -1,7 +1,7 @@
 ---
 {% if alertmanager_global is defined %}
 global:
-{{ alertmanager_global | to_json | from_json | to_nice_yaml }}
+    {{ alertmanager_global | to_json | from_json | to_nice_yaml | indent(4) }}
 {% endif %}
 {% if alertmanager_route is defined %}
 route:
