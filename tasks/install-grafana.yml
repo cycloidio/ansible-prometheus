@@ -1,0 +1,70 @@
+---
+
+- name: Create grafana container
+  docker_container:
+    name: grafana
+    hostname: "{{ grafana_hostname }}"
+    image: "{{ grafana_image }}"
+    volumes:
+      - "{{ path }}/grafana:/var/lib/grafana/dashboards"
+    published_ports:
+      - 3000:3000
+    restart_policy: always
+    env:
+      GF_DATABASE_HOST: "{{ grafana_database_host }}"
+      GF_DATABASE_NAME: "{{ grafana_database_name }}"
+      GF_DATABASE_TYPE: "{{ grafana_database_type }}"
+      GF_DATABASE_USER: "{{ grafana_database_user }}"
+      GF_DATABASE_PASSWORD: "{{ grafana_database_password }}"
+      GF_DASHBOARDS_JSON_ENABLED: true
+
+- name: copy grafana dashboards
+  copy: >
+    src="{{ item }}"
+    dest="{{ path }}/grafana/{{ item | basename }}"
+    owner=root
+    group=nogroup
+    mode=0640
+  with_fileglob: "{{ grafana_dashboards_files }}"
+  notify:
+    - "{{ grafana_restart_handler }}"
+
+# Wait 10m grafana to start
+- name: "Wait for grafana to be started"
+  uri:
+    url: "http://localhost:3000/login"
+    method: GET
+    return_content: yes
+    status_code: "200"
+    validate_certs: no
+  register: grafana_check
+  until: grafana_check|succeeded
+  retries: 60
+  delay: 10
+
+- name: Did we need to create add the prometheus datasource ?
+  uri:
+    url: "http://localhost:3000/api/datasources"
+    method: GET
+    # Try with the default admin user
+    user: admin
+    password: admin
+    force_basic_auth: yes
+    return_content: yes
+  ignore_errors: yes
+  register: result
+  when: install_prometheus
+
+- name: Create prometheus datasource for admin user
+  uri:
+    url: "http://localhost:3000/api/datasources"
+    method: POST
+    # Try with the default admin user
+    user: admin
+    password: admin
+    body_format: json
+    body: "{{ grafana_default_datasource | to_json }}"
+    return_content: yes
+    force_basic_auth: yes
+  ignore_errors: yes
+  when: "result|success and result['content'] == '[]' and install_prometheus"

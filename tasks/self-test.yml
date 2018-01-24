@@ -1,5 +1,7 @@
 ---
 
+- meta: flush_handlers
+
 - name: "Check prometheus running"
   block:
     - uri:
@@ -8,7 +10,7 @@
       register: result
       ignore_errors: yes
 
-    - name: "Prometheus running"
+    - name: "Prometheus is running"
       fail: msg='Prometheus not running, unable to curl index page'
       when: "'<title>Prometheus' not in result['content']"
 
@@ -22,8 +24,22 @@
       register: result
       ignore_errors: yes
 
-    - name: "Prometheus running"
+    - name: "Alertmanager is running"
       fail: msg='Prometheus not running, unable to curl index page'
       when: "'<title>Alertmanager' not in result['content']"
 
   when: install_alertmanager == true
+
+- name: "Check grafana running"
+  block:
+    - uri:
+        url: "http://localhost:3000/login"
+        return_content: yes
+      register: result
+      ignore_errors: yes
+
+    - name: "Grafana is running"
+      fail: msg='Prometheus not running, unable to curl index page'
+      when: "'<title>Grafana' not in result['content']"
+
+  when: install_grafana == true

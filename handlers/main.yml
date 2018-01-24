@@ -10,3 +10,7 @@
 - name: restart blackbox_exporter
   become: yes
   command: docker restart blackbox_exporter
+
+- name: restart grafana
+  become: yes
+  command: docker restart grafana
