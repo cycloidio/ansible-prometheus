@@ -1,0 +1,29 @@
+---
+
+- name: "Check prometheus running"
+  block:
+    - uri:
+        url: "http://localhost:9090/graph"
+        return_content: yes
+      register: result
+      ignore_errors: yes
+
+    - name: "Prometheus running"
+      fail: msg='Prometheus not running, unable to curl index page'
+      when: "'<title>Prometheus' not in result['content']"
+
+  when: install_prometheus == true
+
+- name: "Check alertmanager running"
+  block:
+    - uri:
+        url: "http://localhost:9093/#/alerts"
+        return_content: yes
+      register: result
+      ignore_errors: yes
+
+    - name: "Prometheus running"
+      fail: msg='Prometheus not running, unable to curl index page'
+      when: "'<title>Alertmanager' not in result['content']"
+
+  when: install_alertmanager == true
