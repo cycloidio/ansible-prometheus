@@ -9,6 +9,9 @@
         return_content: yes
       register: result
       ignore_errors: yes
+      until: result|succeeded
+      retries: 6
+      delay: 10
 
     - name: "Prometheus is running"
       fail: msg='Prometheus not running, unable to curl index page'
@@ -23,6 +26,9 @@
         return_content: yes
       register: result
       ignore_errors: yes
+      until: result|succeeded
+      retries: 6
+      delay: 10
 
     - name: "Alertmanager is running"
       fail: msg='Prometheus not running, unable to curl index page'
@@ -37,6 +43,9 @@
         return_content: yes
       register: result
       ignore_errors: yes
+      until: result|succeeded
+      retries: 6
+      delay: 10
 
     - name: "Grafana is running"
       fail: msg='Prometheus not running, unable to curl index page'
