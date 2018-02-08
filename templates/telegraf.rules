@@ -255,8 +255,8 @@ groups:
       receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
     annotations:
     {%- raw %}
-      description: '{{ $labels.instance }} - Aws RDS {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
-      summary: '{{ $labels.instance }} - Aws RDS {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
+      description: '{{ $labels.instance }} - Aws EC2 {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
+      summary: '{{ $labels.instance }} - Aws EC2 {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
     {% endraw %}
 
   - alert: RDSCpuCreditBalance
