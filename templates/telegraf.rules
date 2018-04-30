@@ -7,45 +7,13 @@ groups:
   #
   # System
   #
-  - alert: CPUUsage
-    expr: (100 - cpu_usage_idle{cpu="cpu-total"}) > 90
-    for: 5m
-    labels:
-      {% raw -%}
-      customer: '{{ $labels.client }}'
-      project: '{{ $labels.project }}'
-      role: '{{ $labels.role }}'
-      env: '{{ $labels.env }}'
-      {% endraw -%}
-      severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
-    annotations:
-    {%- raw %}
-      description: '{{$labels.instance}}: CPU usage is above 90% (current value is: {{ $value }})'
-      summary: '{{$labels.instance}}: High CPU usage detected'
-    {% endraw %}
 
-  - alert: MemoryUsage
-    expr: (100 - mem_available_percent) > 90
-    for: 5m
-    labels:
-      {% raw -%}
-      customer: '{{ $labels.client }}'
-      project: '{{ $labels.project }}'
-      role: '{{ $labels.role }}'
-      env: '{{ $labels.env }}'
-      {% endraw -%}
-      severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
-    annotations:
-    {%- raw %}
-      description: '{{$labels.instance}}: Memory usage is above 90% (current value is: {{ $value }})'
-      summary: '{{$labels.instance}}: High memory usage detected'
-    {% endraw %}
+{% for user_config in prometheus_telegraf_rules_config.get('CPUUsage', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['CPUUsage']) | combine(user_config) %}
 
-  - alert: LoadAverage
-    expr: (system_load5 / system_n_cpus) > 2.5
-    for: 5m
+  - alert: {{ c['name'] }}
+    expr: (100 - cpu_usage_idle{cpu="cpu-total", {{ c['selector'] }} }) > {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -54,16 +22,61 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: CPU usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: High CPU usage detected'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('MemoryUsage', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['MemoryUsage']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: (100 - mem_available_percent{ {{ c['selector'] }} }) > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: {{ c['receiver'] }}
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Memory usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: High memory usage detected'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('LoadAverage', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['LoadAverage']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: (system_load5{ {{ c['selector'] }} } / system_n_cpus{ {{ c['selector'] }} }) > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{$labels.instance}}: LoadAverage is high (current value is: {{ $value }} per cpu)'
       summary: '{{$labels.instance}}: High LoadAverage detected'
     {% endraw %}
+{% endfor %}
 
-  - alert: LowDiskSpace
-    expr: disk_used_percent > 90
-    for: 5m
+
+{% for user_config in prometheus_telegraf_rules_config.get('LowDiskSpace', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['LowDiskSpace']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: disk_used_percent{ {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -72,16 +85,18 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
-    {%- raw %}
-      description: '{{$labels.instance}}: {{$labels.path}} disk usage is above 90% (current value is: {{ $value }})'
-      summary: '{{$labels.instance}}: Low disk space'
-    {% endraw %}
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: {%- raw %}{{$labels.path}}{% endraw %} disk usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Low disk space'
+{% endfor %}
 
-  - alert: LowDiskInodes
-    expr: ((disk_inodes_used / disk_inodes_total) * 100) > 90
-    for: 5m
+{% for user_config in prometheus_telegraf_rules_config.get('LowDiskInodes', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['LowDiskInodes']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: ((disk_inodes_used{ {{ c['selector'] }} } / disk_inodes_total{ {{ c['selector'] }} }) * 100) > {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -90,17 +105,19 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
-    {%- raw %}
-      description: '{{$labels.instance}}: {{$labels.path}} disk inodes is above 90% (current value is: {{ $value }})'
-      summary: '{{$labels.instance}}: Low disk inodes'
-    {% endraw %}
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: {%- raw %}{{$labels.path}}{% endraw %} disk inodes is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Low disk inodes'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('InstanceDown', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['InstanceDown']) | combine(user_config) %}
 
   # Do not raise down alarm for preprod and dev instances
-  - alert: InstanceDown
-    expr: up{env !~ "dev|preprod|staging"} == 0
-    for: 5m
+  - alert: {{ c['name'] }}
+    expr: up{ {{  c['selector'] }} } == 0
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -109,37 +126,22 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
-    {%- raw %}
-      description: '{{ $labels.instance }} - {{ $labels.Name }} has been down for more than 5 minutes.'
-      summary: 'Instance {{ $labels.instance }} down'
-    {% endraw %}
+      description: '{%- raw %}{{ $labels.instance }}{% endraw %} - {%- raw %}{{ $labels.Name }}{% endraw %} has been down for more than {{ c['for'] }} minutes.'
+      summary: 'Instance {%- raw %}{{ $labels.instance }}{% endraw %} down'
+{% endfor %}
 
   #
   # Http
   #
-  - alert: HttpResponseCode
-    expr: http_response_http_response_code > 302
-    for: 5m
-    labels:
-      {% raw -%}
-      customer: '{{ $labels.client }}'
-      project: '{{ $labels.project }}'
-      role: '{{ $labels.role }}'
-      env: '{{ $labels.env }}'
-      {% endraw -%}
-      severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
-    annotations:
-    {%- raw %}
-      description: '{{ $labels.instance }} - {{ $labels.server }} return code > 302 for more than 5 minutes.'
-      summary: 'Instance {{ $labels.instance }} return code {{ $value }} > 302'
-    {% endraw %}
 
-  - alert: HttpResponseStringMatch
-    expr: http_response_response_string_match == 0
-    for: 5m
+{% for user_config in prometheus_telegraf_rules_config.get('HttpResponseCode', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['HttpResponseCode']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: http_response_http_response_code{ {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -148,20 +150,45 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
+    annotations:
+      description: '{%- raw %}{{ $labels.instance }}{% endraw %} - {%- raw %}{{ $labels.server }}{% endraw %} return code > {{ c['threshold'] }} for more than {{ c['for'] }} minutes.'
+      summary: 'Instance {%- raw %}{{ $labels.instance }}{% endraw %} return code {%- raw %}{{ $value }}{% endraw %} > {{ c['threshold'] }}'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('HttpResponseStringMatch', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['HttpResponseStringMatch']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: http_response_response_string_match{ {{ c['selector'] }} } == 0
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: critical
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
-      description: '{{ $labels.instance }} - {{ $labels.server }} not able to match the requested string for more than 5 minutes.'
+      description: '{{ $labels.instance }} - {{ $labels.server }} not able to match the requested string.'
       summary: 'Instance {{ $labels.instance }} - {{ $labels.server }} pattern not found'
     {% endraw %}
+{% endfor %}
 
   # Using min_over_time https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation-_over_time
   # As we run this check only every 30min, there is some hole in the graph.
   # So we are taking the min value to have enough data for the alert. Keeping in mind that this alert should
   # Change value only once a day. Having a 1h step is ok.
-  - alert: LbCertsExpireCheck
-    expr: min_over_time(aws_lb_certs_expire_days[1h]) < 30
-    for: 5m
+
+{% for user_config in prometheus_telegraf_rules_config.get('LbCertsExpireCheck', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['LbCertsExpireCheck']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: min_over_time(aws_lb_certs_expire_days{ {{ c['selector'] }} }[1h]) < {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -170,12 +197,13 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - cert {{ $labels.cert }} for {{ $labels.cert_cn }} will expire in {{ $value }} days.'
       summary: 'Instance {{ $labels.instance }} - found cert {{ $labels.cert_cn }} will expire in {{ $value }} days'
     {% endraw %}
+{% endfor %}
 
   #
   # Mongodb
@@ -192,7 +220,7 @@ groups:
 #      env: '{{ $labels.env }}'
 #      {% endraw -%}
 #      severity: critical
-#      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+#      receiver: 'on_call'
 #    annotations:
 #    {%- raw %}
 #      description: '{{ $labels.instance }} - Mongodb not ok for more than 5 minutes.'
@@ -202,9 +230,13 @@ groups:
   #
   # Amazon SES
   #
-  - alert: SesSentQuota
-    expr: ( sum (aws_ses_quota{type="sent"}) without (type) / sum (aws_ses_quota{type="max"}) without (type) ) * 100 > 90
-    for: 5m
+
+{% for user_config in prometheus_telegraf_rules_config.get('SesSentQuota', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['SesSentQuota']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: ( sum (aws_ses_quota{type="sent",{{ c['selector'] }}}) without (type) / sum (aws_ses_quota{type="max",{{ c['selector'] }}}) without (type) ) * 100 > {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -213,16 +245,20 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - SES sent {{ $value }}% quota used.'
       summary: '{{ $labels.instance }} - SES sent {{ $value }}% quota used.'
     {% endraw %}
+{% endfor %}
 
-  - alert: SesReputation
-    expr: (aws_ses_reputation{type="bounces"} or aws_ses_reputation{type="complaints"}) > 10
-    for: 5m
+{% for user_config in prometheus_telegraf_rules_config.get('SesReputation', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['SesReputation']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: (aws_ses_reputation{type="bounces",{{ c['selector'] }}} or aws_ses_reputation{type="complaints",{{ c['selector'] }}}) > {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -231,19 +267,24 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - SES {{ $labels.type }} reputation is {{ $value }}.'
       summary: '{{ $labels.instance }} - SES {{ $labels.type }} reputation is {{ $value }}.'
     {% endraw %}
+{% endfor %}
 
   #
   # Amazon CPUCredit
   #
-  - alert: EC2CpuCreditBalance
-    expr: cloudwatch_aws_ec2_cpu_credit_balance_average < 30
-    for: 5m
+
+{% for user_config in prometheus_telegraf_rules_config.get('EC2CpuCreditBalance', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['EC2CpuCreditBalance']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: cloudwatch_aws_ec2_cpu_credit_balance_average{ {{ c['selector'] }} } < {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -252,16 +293,20 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws EC2 {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
       summary: '{{ $labels.instance }} - Aws EC2 {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
     {% endraw %}
+{% endfor %}
 
-  - alert: RDSCpuCreditBalance
-    expr: cloudwatch_aws_rds_cpu_credit_balance_average < 30
-    for: 5m
+{% for user_config in prometheus_telegraf_rules_config.get('RDSCpuCreditBalance', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['RDSCpuCreditBalance']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: cloudwatch_aws_rds_cpu_credit_balance_average{ {{ c['selector'] }} } < {{ c['threshold'] }}
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -270,19 +315,24 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: critical
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws RDS {{ $labels.db_instance_identifier }} CPU Credit Balance low {{ $value }}.'
       summary: '{{ $labels.instance }} - Aws RDS {{ $labels.db_instance_identifier }} CPU Credit Balance low {{ $value }}.'
     {% endraw %}
+{% endfor %}
 
   #
   # Amazon Events
   #
-  - alert: EC2Events
-    expr: aws_ec2_instance_events > 0
-    for: 5m
+
+{% for user_config in prometheus_telegraf_rules_config.get('EC2Events', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['EC2Events']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: aws_ec2_instance_events{ {{ c['selector'] }} } > 0
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -291,16 +341,20 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: warning
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
       summary: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
     {% endraw %}
+{% endfor %}
 
-  - alert: RDSEvents
-    expr: aws_rds_instance_events > 0
-    for: 5m
+{% for user_config in prometheus_telegraf_rules_config.get('RDSEvents', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['RDSEvents']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: aws_rds_instance_events{ {{ c['selector'] }} } > 0
+    for: {{ c['for'] }}
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
@@ -309,12 +363,13 @@ groups:
       env: '{{ $labels.env }}'
       {% endraw -%}
       severity: warning
-      receiver: {{ prometheus_telegraf_rules_config['receiver'] | default('on_call') }}
+      receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
       summary: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
     {% endraw %}
+{% endfor %}
 
 
 ## This alarm should always ring to trigger a curl on opsgenie heartbeat

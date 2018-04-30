@@ -46,8 +46,66 @@ alertmanager_template_files:
 
 # Telegraf rules
 prometheus_telegraf_rules_config: {}
-#  receiver: slack
+# prometheus_telegraf_rules_config:
+#   CPUUsage:
+#     - name: CPUUsageProd
+#         threshold: 80
+#     - name: CPUUsageStaging
 
+prometheus_telegraf_rules_default_global: {}
+
+prometheus_telegraf_rules_config_default:
+  CPUUsage:
+    name: CPUUsage
+    threshold: 90
+  MemoryUsage:
+    name: MemoryUsage
+    threshold: 90
+  LoadAverage:
+    name: LoadAverage
+    threshold: 2.5
+  LowDiskSpace:
+    name: LowDiskSpace
+    threshold: 90
+  LowDiskInodes:
+    name: LowDiskInodes
+    threshold: 90
+  InstanceDown:
+    name: InstanceDown
+    selector: env !~ "dev|demo|preprod|staging"
+  HttpResponseCode:
+    name: HttpResponseCode
+    threshold: 302
+  HttpResponseStringMatch:
+    name: HttpResponseStringMatch
+  LbCertsExpireCheck:
+    name: LbCertsExpireCheck
+    threshold: 30
+  SesSentQuota:
+    name: SesSentQuota
+    threshold: 90
+  SesReputation:
+    name: SesReputation
+    threshold: 10
+  EC2CpuCreditBalance:
+    name: EC2CpuCreditBalance
+    threshold: 30
+  RDSCpuCreditBalance:
+    name: RDSCpuCreditBalance
+    threshold: 30
+  EC2Events:
+    name: EC2Events
+  RDSEvents:
+    name: RDSEvents
+
+# Top global scope level to define default variable for each checks
+# You should not have to override this variable
+prometheus_telegraf_rules_default_root:
+  for: 5m
+  receiver: oncall
+  selector: ""
+
+_prometheus_telegraf_rules_default_global: "{{ prometheus_telegraf_rules_default_root | combine(prometheus_telegraf_rules_default_global) }}"
 
 # See https://prometheus.io/docs/operating/configuration/#<scrape_config>
 prometheus_scrape_configs:
@@ -138,5 +196,3 @@ grafana_default_datasource:
   access: "proxy"
   basicAuth: false
   isDefault: true
-
-
