@@ -21,7 +21,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: CPU usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
@@ -41,7 +41,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: Memory usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
@@ -61,7 +61,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -84,7 +84,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: {%- raw %}{{$labels.path}}{% endraw %} disk usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
@@ -104,7 +104,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: {%- raw %}{{$labels.path}}{% endraw %} disk inodes is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
@@ -125,7 +125,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
       description: '{%- raw %}{{ $labels.instance }}{% endraw %} - {%- raw %}{{ $labels.Name }}{% endraw %} has been down for more than {{ c['for'] }} minutes.'
@@ -149,7 +149,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
       description: '{%- raw %}{{ $labels.instance }}{% endraw %} - {%- raw %}{{ $labels.server }}{% endraw %} return code > {{ c['threshold'] }} for more than {{ c['for'] }} minutes.'
@@ -169,7 +169,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -196,7 +196,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -219,7 +219,7 @@ groups:
 #      project: '{{ $labels.project }}'
 #      env: '{{ $labels.env }}'
 #      {% endraw -%}
-#      severity: critical
+#      severity: {{ c['severity'] }}
 #      receiver: 'on_call'
 #    annotations:
 #    {%- raw %}
@@ -244,7 +244,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -266,7 +266,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -292,7 +292,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -314,7 +314,7 @@ groups:
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
-      severity: critical
+      severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
     annotations:
     {%- raw %}
@@ -379,7 +379,7 @@ groups:
 #    expr: absent(absent(prometheus_build_info == 1))
 #    labels:
 #      env: "{{ env }}"
-#      severity: critical
+#      severity: {{ c['severity'] }}
 #      receiver: opsgenie_heartbeat
 #    annotations:
 #      description: 'Test if prometheus and alert manager still working'
