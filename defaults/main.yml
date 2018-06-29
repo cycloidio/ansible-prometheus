@@ -104,6 +104,7 @@ prometheus_telegraf_rules_default_root:
   for: 5m
   receiver: oncall
   selector: ""
+  severity: critical
 
 _prometheus_telegraf_rules_default_global: "{{ prometheus_telegraf_rules_default_root | combine(prometheus_telegraf_rules_default_global) }}"
 
