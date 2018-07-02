@@ -41,6 +41,10 @@ alertmanager_image: "prom/alertmanager"
 # Fileglobs loop format
 # http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
 prometheus_rule_files: []
+# Example :
+#  - templates/telegraf.rules
+#  - templates/opsgenie.rules
+
 alertmanager_template_files:
   - files/alertmanager_templates/*.tmpl
 
@@ -97,6 +101,9 @@ prometheus_telegraf_rules_config_default:
     name: EC2Events
   RDSEvents:
     name: RDSEvents
+  OpsgenieHeartbeat:
+    name: OpsgenieHeartbeat
+    receiver: opsgenie_heartbeat
 
 # Top global scope level to define default variable for each checks
 # You should not have to override this variable

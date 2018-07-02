@@ -213,14 +213,6 @@ groups:
 #  - alert: MongodbOk
 #    expr: mongodb_ok == 0
 #    for: 5m
-#    labels:
-#      {% raw -%}
-#      customer: '{{ $labels.client }}'
-#      project: '{{ $labels.project }}'
-#      env: '{{ $labels.env }}'
-#      {% endraw -%}
-#      severity: {{ c['severity'] }}
-#      receiver: 'on_call'
 #    annotations:
 #    {%- raw %}
 #      description: '{{ $labels.instance }} - Mongodb not ok for more than 5 minutes.'
@@ -372,15 +364,3 @@ groups:
 {% endfor %}
 
 
-## This alarm should always ring to trigger a curl on opsgenie heartbeat
-#- name: opsgenie.rules
-#  rules:
-#  - alert: opsgenie heartbeat
-#    expr: absent(absent(prometheus_build_info == 1))
-#    labels:
-#      env: "{{ env }}"
-#      severity: {{ c['severity'] }}
-#      receiver: opsgenie_heartbeat
-#    annotations:
-#      description: 'Test if prometheus and alert manager still working'
-#      summary: 'Prometheus and alertmanager service working'
