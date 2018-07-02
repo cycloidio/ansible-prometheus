@@ -1,0 +1,23 @@
+groups:
+
+- name: opsenie.rules
+  rules:
+
+{% for user_config in prometheus_telegraf_rules_config.get('OpsgenieHeartbeat', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['OpsgenieHeartbeat']) | combine(user_config) %}
+
+  # Do not raise down alarm for preprod and dev instances
+  - alert: {{ c['name'] }}
+    expr: absent(absent(prometheus_build_info == 1))
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+    annotations:
+      description: 'Test if prometheus and alert manager still working'
+      summary: 'Prometheus and alertmanager service working'
+{% endfor %}
