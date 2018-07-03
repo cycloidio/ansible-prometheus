@@ -8,7 +8,7 @@ groups:
 
   # Do not raise down alarm for preprod and dev instances
   - alert: {{ c['name'] }}
-    expr: absent(absent(prometheus_build_info == 1))
+    expr: prometheus_build_info == 1
     labels:
       {% raw -%}
       customer: '{{ $labels.client }}'
