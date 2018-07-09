@@ -109,7 +109,7 @@ prometheus_telegraf_rules_config_default:
 # You should not have to override this variable
 prometheus_telegraf_rules_default_root:
   for: 5m
-  receiver: oncall
+  receiver: on_call
   selector: ""
   severity: critical
 
