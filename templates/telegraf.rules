@@ -363,4 +363,47 @@ groups:
     {% endraw %}
 {% endfor %}
 
+  #
+  # EventStore
+  #
+
+{% for user_config in prometheus_telegraf_rules_config.get('EventstoreIsAlive', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['EventstoreIsAlive']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: eventstore_isAlive == 0
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%} 
+      customer: '{{ $labels.client }}' 
+      project: '{{ $labels.project }}' 
+      role: '{{ $labels.role }}' 
+      env: '{{ $labels.env }}' 
+      {% endraw -%} 
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: detected the node {%- raw %}{{$labels.node}}{% endraw %} as dead)'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: detected the node {%- raw %}{{$labels.node}}{% endraw %} as dead)'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('EventstoreCheckError', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['EventstoreCheckError']) | combine(user_config) %}
+
+  - alert: {{ c['name'] }}
+    expr: eventstore_check_error == 1
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%} 
+      customer: '{{ $labels.client }}' 
+      project: '{{ $labels.project }}' 
+      role: '{{ $labels.role }}' 
+      env: '{{ $labels.env }}' 
+      {% endraw -%} 
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Error {%- raw %}{{$labels.reason}}{% endraw %} while running the eventstore check)'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Error running eventstore check'
+{% endfor %}
 
