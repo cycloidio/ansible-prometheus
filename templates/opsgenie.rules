@@ -1,6 +1,6 @@
 groups:
 
-- name: opsenie.rules
+- name: opsgenie.rules
   rules:
 
 {% for user_config in prometheus_telegraf_rules_config.get('OpsgenieHeartbeat', [{}]) %}

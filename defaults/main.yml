@@ -104,6 +104,10 @@ prometheus_telegraf_rules_config_default:
   OpsgenieHeartbeat:
     name: OpsgenieHeartbeat
     receiver: opsgenie_heartbeat
+  EventstoreIsAlive:
+    name: EventstoreIsAlive
+  EventstoreCheckError:
+    name: EventstoreCheckError
 
 # Top global scope level to define default variable for each checks
 # You should not have to override this variable
