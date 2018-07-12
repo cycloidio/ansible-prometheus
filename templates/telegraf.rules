@@ -227,7 +227,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['SesSentQuota']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: ( sum (aws_ses_quota{type="sent",{{ c['selector'] }}}) without (type) / sum (aws_ses_quota{type="max",{{ c['selector'] }}}) without (type) ) * 100 > {{ c['threshold'] }}
+    expr: ( sum (avg_over_time(aws_ses_quota{type="sent",{{ c['selector'] }}}[15m])) without (type) / sum (avg_over_time(aws_ses_quota{type="max",{{ c['selector'] }}}[15m])) without (type) ) * 100 > {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
@@ -249,7 +249,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['SesReputation']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: (aws_ses_reputation{type="bounces",{{ c['selector'] }}} or aws_ses_reputation{type="complaints",{{ c['selector'] }}}) > {{ c['threshold'] }}
+    expr: (avg_over_time(aws_ses_reputation{type="bounces",{{ c['selector'] }}}[15m]) or avg_over_time(aws_ses_reputation{type="complaints",{{ c['selector'] }}}[15m])) > {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
@@ -275,7 +275,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['EC2CpuCreditBalance']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: cloudwatch_aws_ec2_cpu_credit_balance_average{ {{ c['selector'] }} } < {{ c['threshold'] }}
+    expr: avg_over_time(cloudwatch_aws_ec2_cpu_credit_balance_average{ {{ c['selector'] }} }[15m]) < {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
@@ -297,7 +297,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['RDSCpuCreditBalance']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: cloudwatch_aws_rds_cpu_credit_balance_average{ {{ c['selector'] }} } < {{ c['threshold'] }}
+    expr: avg_over_time(cloudwatch_aws_rds_cpu_credit_balance_average{ {{ c['selector'] }} }[15m]) < {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
@@ -323,7 +323,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['EC2Events']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: aws_ec2_instance_events{ {{ c['selector'] }} } > 0
+    expr: max_over_time(aws_ec2_instance_events{ {{ c['selector'] }} }[15m]) > 0
     for: {{ c['for'] }}
     labels:
       {% raw -%}
@@ -345,7 +345,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['RDSEvents']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: aws_rds_instance_events{ {{ c['selector'] }} } > 0
+    expr: avg_over_time(aws_rds_instance_events{ {{ c['selector'] }} }[15m]) > 0
     for: {{ c['for'] }}
     labels:
       {% raw -%}
