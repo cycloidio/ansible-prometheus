@@ -32,10 +32,12 @@ prometheus_external_labels: ''
 prometheus_commandline_args:
   config.file: "/prometheus-data/prometheus.yml"
   storage.tsdb.path: "/prometheus-data/data"
+  web.external-url: "{{ prometheus_hostname }}"
 prometheus_image: "prom/prometheus"
 
 alertmanager_commandline_args:
   config.file: "/alertmanager/alertmanager.yml"
+  web.external-url: "{{ alertmanager_hostname }}"
 alertmanager_image: "prom/alertmanager"
 
 # Fileglobs loop format
