@@ -37,7 +37,7 @@ prometheus_image: "prom/prometheus"
 
 alertmanager_commandline_args:
   config.file: "/alertmanager/alertmanager.yml"
-  web.external-url: "{{ alertmanager_hostname }}"
+  web.external-url: "http://{{ alertmanager_hostname }}"
 alertmanager_image: "prom/alertmanager"
 
 # Fileglobs loop format
