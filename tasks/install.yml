@@ -23,4 +23,10 @@
     - python-pip
   when: ansible_os_family == "RedHat"
 
-- pip: name=docker-py version=1.9.0
+- name: python deps
+  pip: >
+    name={{item.name}}
+    state={{item.state}}
+  with_items:
+    - { name: docker-py, state: absent }
+    - { name: docker, state: present }
