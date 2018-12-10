@@ -38,7 +38,8 @@ prometheus_image: "prom/prometheus:{{ prometheus_version }}"
 alertmanager_commandline_args:
   config.file: "/alertmanager/alertmanager.yml"
   web.external-url: "http://{{ alertmanager_hostname }}"
-alertmanager_image: "prom/alertmanager"
+alertmanager_version: latest
+alertmanager_image: "prom/alertmanager:{{ alertmanager_version }}"
 
 # Fileglobs loop format
 # http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
@@ -193,7 +194,8 @@ blackbox_exporter_modules:
 # Grafana
 #
 
-grafana_image: grafana/grafana:4.5.0
+grafana_version: 4.5.0
+grafana_image: "grafana/grafana:{{ grafana_version }}"
 grafana_database_type: mysql
 grafana_database_host: "localhost:3306"
 grafana_database_name: grafana
