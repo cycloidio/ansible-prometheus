@@ -33,7 +33,7 @@ prometheus_commandline_args:
   config.file: "/prometheus-data/prometheus.yml"
   storage.tsdb.path: "/prometheus-data/data"
   web.external-url: "{{ prometheus_hostname }}"
-prometheus_image: "prom/prometheus"
+prometheus_image: "prom/prometheus:{{ prometheus_version }}"
 
 alertmanager_commandline_args:
   config.file: "/alertmanager/alertmanager.yml"
