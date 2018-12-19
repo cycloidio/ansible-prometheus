@@ -48,6 +48,9 @@ prometheus_rule_files: []
 #  - templates/telegraf.rules
 #  - templates/opsgenie.rules
 
+# If set, will add UUID labels on alert rules.
+prometheus_alerts_uuid: ""
+
 alertmanager_template_files:
   - files/alertmanager_templates/*.tmpl
 

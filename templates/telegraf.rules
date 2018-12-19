@@ -23,6 +23,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: CPU usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: High CPU usage detected'
@@ -43,6 +45,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: Memory usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: High memory usage detected'
@@ -63,6 +67,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{$labels.instance}}: LoadAverage is high (current value is: {{ $value }} per cpu)'
@@ -86,6 +92,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: {%- raw %}{{$labels.path}}{% endraw %} disk usage is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Low disk space'
@@ -106,6 +114,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: {%- raw %}{{$labels.path}}{% endraw %} disk inodes is above {{ c['threshold'] }}% (current value is: {%- raw %}{{ $value }}{% endraw %})'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Low disk inodes'
@@ -127,6 +137,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{ $labels.instance }}{% endraw %} - {%- raw %}{{ $labels.Name }}{% endraw %} has been down for more than {{ c['for'] }} minutes.'
       summary: 'Instance {%- raw %}{{ $labels.instance }}{% endraw %} down'
@@ -151,6 +163,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{ $labels.instance }}{% endraw %} - {%- raw %}{{ $labels.server }}{% endraw %} return code > {{ c['threshold'] }} for more than {{ c['for'] }} minutes.'
       summary: 'Instance {%- raw %}{{ $labels.instance }}{% endraw %} return code {%- raw %}{{ $value }}{% endraw %} > {{ c['threshold'] }}'
@@ -171,6 +185,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - {{ $labels.server }} not able to match the requested string.'
@@ -198,6 +214,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - cert {{ $labels.cert }} for {{ $labels.cert_cn }} will expire in {{ $value }} days.'
@@ -238,6 +256,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - SES sent {{ $value }}% quota used.'
@@ -260,6 +280,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - SES {{ $labels.type }} reputation is {{ $value }}.'
@@ -286,6 +308,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws EC2 {{ $labels.instance_id }} CPU Credit Balance low {{ $value }}.'
@@ -308,6 +332,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws RDS {{ $labels.db_instance_identifier }} CPU Credit Balance low {{ $value }}.'
@@ -334,6 +360,8 @@ groups:
       {% endraw -%}
       severity: warning
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
@@ -356,6 +384,8 @@ groups:
       {% endraw -%}
       severity: warning
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
     {%- raw %}
       description: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
@@ -382,6 +412,8 @@ groups:
       {% endraw -%} 
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: detected the node {%- raw %}{{$labels.node}}{% endraw %} as dead)'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: detected the node {%- raw %}{{$labels.node}}{% endraw %} as dead)'
@@ -402,6 +434,8 @@ groups:
       {% endraw -%} 
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: Error {%- raw %}{{$labels.reason}}{% endraw %} while running the eventstore check)'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Error running eventstore check'
