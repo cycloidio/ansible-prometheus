@@ -17,6 +17,8 @@ groups:
       {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
     annotations:
       description: 'Test if prometheus and alert manager still working'
       summary: 'Prometheus and alertmanager service working'
