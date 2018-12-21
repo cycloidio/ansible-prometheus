@@ -1,0 +1,78 @@
+groups:
+
+- name: telegraf-elasticsearch.rules
+  rules:
+  # calculate filesystem used and free percent
+  - record: elasticsearch_fs_total_used_percent
+    expr: 100 * (elasticsearch_fs_total_total_in_bytes - elasticsearch_fs_total_free_in_bytes) / elasticsearch_fs_total_total_in_bytes
+  - record: elasticsearch_fs_total_free_percent
+    expr: 100 - elasticsearch_fs_total_used_percent
+
+{% for user_config in prometheus_telegraf_rules_config.get('ElasticsearchTooFewNodesRunning', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['ElasticsearchTooFewNodesRunning']) | combine(user_config) %}
+
+  # alert if too few nodes are running
+  - alert: {{ c['name'] }}
+    expr: elasticsearch_cluster_health_number_of_nodes{ {{ c['selector'] }} } < {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: 'There are only {%- raw %}{{$value}}{% endraw %} < {{ c['threshold'] }} ElasticSearch nodes running'
+      summary: 'ElasticSearch running on less than {{ c['threshold'] }} nodes'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('ElasticsearchHeapTooHigh', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['ElasticsearchHeapTooHigh']) | combine(user_config) %}
+
+  # alert if heap usage is over 90%
+  - alert: {{ c['name'] }}
+    expr: elasticsearch_jvm_mem_heap_used_percent{ {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.node_name}}{% endraw %}: heap usage is above {{ c['threshold'] }}% for {{ c['for'] }} (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.node_name}}{% endraw %}: High heap usage detected'
+{% endfor %}
+
+{% for user_config in prometheus_telegraf_rules_config.get('ElasticsearchCPUTooHigh', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['ElasticsearchCPUTooHigh']) | combine(user_config) %}
+
+  # alert if cpu usage is over 90%
+  - alert: {{ c['name'] }}
+    expr: elasticsearch_os_cpu_percent{ {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.node_name}}{% endraw %}: CPU usage is above {{ c['threshold'] }}% for {{ c['for'] }} (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.node_name}}{% endraw %}: High CPU usage detected'
+{% endfor %}

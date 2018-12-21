@@ -1,0 +1,30 @@
+groups:
+
+- name: telegraf-redis.rules
+  rules:
+  # calculate memory usage percent
+  - record: redis_memory_usage_percent
+    expr: 100 * (redis_used_memory / redis_maxmemory)
+
+{% for user_config in prometheus_telegraf_rules_config.get('RedisMemoryUsageTooHigh', [{}]) %}
+  {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['RedisMemoryUsageTooHigh']) | combine(user_config) %}
+
+  # alert if memory usage is over 90%
+  - alert: {{ c['name'] }}
+    expr: redis_memory_usage_percent{ {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.server}}{% endraw %}: memory usage is above {{ c['threshold'] }}% for {{ c['for'] }} (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.server}}{% endraw %}: High memory usage detected'
+{% endfor %}
