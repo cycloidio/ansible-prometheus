@@ -45,8 +45,10 @@ alertmanager_image: "prom/alertmanager:{{ alertmanager_version }}"
 # http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
 prometheus_rule_files: []
 # Example :
-#  - templates/telegraf.rules
 #  - templates/opsgenie.rules
+#  - templates/telegraf.rules
+#  - templates/telegraf-elasticsearch.rules
+#  - templates/telegraf-redis.rules
 
 # If set, will add UUID labels on alert rules.
 prometheus_alerts_uuid: ""
@@ -114,6 +116,20 @@ prometheus_telegraf_rules_config_default:
     name: EventstoreIsAlive
   EventstoreCheckError:
     name: EventstoreCheckError
+  ElasticsearchTooFewNodesRunning:
+    name: ElasticsearchTooFewNodesRunning
+    threshold: 3
+  ElasticsearchHeapTooHigh:
+    name: ElasticsearchHeapTooHigh
+    for: 15m
+    threshold: 90
+  ElasticsearchCPUTooHigh:
+    name: ElasticsearchCPUTooHigh
+    for: 15m
+    threshold: 90
+  RedisMemoryUsageTooHigh:
+    name: RedisMemoryUsageTooHigh
+    threshold: 90
 
 # Top global scope level to define default variable for each checks
 # You should not have to override this variable
