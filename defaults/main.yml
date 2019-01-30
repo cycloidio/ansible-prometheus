@@ -101,10 +101,10 @@ prometheus_telegraf_rules_config_default:
     threshold: 10
   EC2CpuCreditBalance:
     name: EC2CpuCreditBalance
-    threshold: 30
+    threshold: 25
   RDSCpuCreditBalance:
     name: RDSCpuCreditBalance
-    threshold: 30
+    threshold: 25
   EC2Events:
     name: EC2Events
   RDSEvents:
