@@ -174,7 +174,7 @@ groups:
   {% set c = _prometheus_telegraf_rules_default_global | combine(prometheus_telegraf_rules_config_default['HttpResponseStringMatch']) | combine(user_config) %}
 
   - alert: {{ c['name'] }}
-    expr: http_response_response_string_match{ {{ c['selector'] }} } == 0
+    expr: http_response_response_string_match{ {{ c['selector'] }} } == {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
