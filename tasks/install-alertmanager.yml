@@ -19,12 +19,20 @@
     mode=0740
     state=directory
 
+- name: Ensure alertmanager data directory exist
+  file: >
+    path="{{ path }}/alertmanager/data"
+    owner=nobody
+    group=nogroup
+    mode=0740
+    state=directory
+
 - name: copy alertmanager config file
   template: >
     src=templates/alertmanager.yml.j2
     dest="{{ path }}/alertmanager/alertmanager.yml"
     owner=root
-    group=root
+    group=nogroup
     mode=0640
   notify:
     - "{{ alertmanager_restart_handler }}"
