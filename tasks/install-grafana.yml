@@ -16,6 +16,7 @@
       GF_DATABASE_TYPE: "{{ grafana_database_type }}"
       GF_DATABASE_USER: "{{ grafana_database_user }}"
       GF_DATABASE_PASSWORD: "{{ grafana_database_password }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
       GF_DASHBOARDS_JSON_ENABLED: true
 
 - name: copy grafana dashboards
@@ -48,7 +49,7 @@
     method: GET
     # Try with the default admin user
     user: admin
-    password: admin
+    password: "{{ grafana_admin_password }}"
     force_basic_auth: yes
     return_content: yes
   ignore_errors: yes
@@ -61,7 +62,7 @@
     method: POST
     # Try with the default admin user
     user: admin
-    password: admin
+    password: "{{ grafana_admin_password }}"
     body_format: json
     body: "{{ grafana_default_datasource | to_json }}"
     return_content: yes
