@@ -404,12 +404,12 @@ groups:
     expr: eventstore_isAlive == 0
     for: {{ c['for'] }}
     labels:
-      {% raw -%} 
-      customer: '{{ $labels.client }}' 
-      project: '{{ $labels.project }}' 
-      role: '{{ $labels.role }}' 
-      env: '{{ $labels.env }}' 
-      {% endraw -%} 
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
       {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
@@ -426,12 +426,12 @@ groups:
     expr: eventstore_check_error == 1
     for: {{ c['for'] }}
     labels:
-      {% raw -%} 
-      customer: '{{ $labels.client }}' 
-      project: '{{ $labels.project }}' 
-      role: '{{ $labels.role }}' 
-      env: '{{ $labels.env }}' 
-      {% endraw -%} 
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
       severity: {{ c['severity'] }}
       receiver: {{ c['receiver'] }}
       {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
@@ -440,4 +440,3 @@ groups:
       description: '{%- raw %}{{$labels.instance}}{% endraw %}: Error {%- raw %}{{$labels.reason}}{% endraw %} while running the eventstore check)'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: Error running eventstore check'
 {% endfor %}
-

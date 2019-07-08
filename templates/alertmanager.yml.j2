@@ -3,18 +3,22 @@
 global:
     {{ alertmanager_global | to_json | from_json | to_nice_yaml | indent(4) }}
 {% endif %}
+
 {% if alertmanager_route is defined %}
 route:
     {{ alertmanager_route | to_json | from_json | to_nice_yaml | indent(4) }}
 {% endif %}
+
 {% if alertmanager_templates is defined %}
 templates:
 {{ alertmanager_templates | to_json | from_json | to_nice_yaml }}
 {% endif %}
+
 {% if alertmanager_inhibit_rules is defined %}
 inhibit_rules:
 {{ alertmanager_inhibit_rules | to_json | from_json | to_nice_yaml }}
 {% endif %}
+
 {% if alertmanager_receivers is defined %}
 receivers:
 {{ alertmanager_receivers | to_json | from_json | to_nice_yaml }}

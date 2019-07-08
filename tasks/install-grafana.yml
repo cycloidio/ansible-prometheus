@@ -6,7 +6,8 @@
     hostname: "{{ grafana_hostname }}"
     image: "{{ grafana_image }}"
     volumes:
-      - "{{ path }}/grafana:/var/lib/grafana/dashboards"
+      - "{{ path }}/grafana/provisioning:/etc/grafana/provisioning"
+      - "{{ path }}/grafana/dashboards:/var/lib/grafana/dashboards"
     published_ports:
       - 3000:3000
     restart_policy: always
@@ -22,13 +23,33 @@
 - name: copy grafana dashboards
   copy: >
     src="{{ item }}"
-    dest="{{ path }}/grafana/{{ item | basename }}"
+    dest="{{ path }}/grafana/dashboards/{{ item | basename }}"
     owner=root
     group=nogroup
-    mode=0640
+    mode=0644
   with_fileglob: "{{ grafana_dashboards_files }}"
   notify:
     - "{{ grafana_restart_handler }}"
+
+- name: copy grafana provisioning
+  block:
+    - file:
+        path: "{{ path }}/grafana/provisioning/{{ item }}"
+        state: directory
+      with_items:
+        - dashboards
+        - datasources
+        - notifiers
+
+    - copy: >
+        src="{{ item }}"
+        dest="{{ path }}/grafana/provisioning/{{ item | dirname | basename }}/{{ item | basename }}"
+        owner=root
+        group=nogroup
+        mode=0644
+      with_fileglob: "{{ grafana_provisioning_files }}"
+      notify:
+        - "{{ grafana_restart_handler }}"
 
 # Wait 10m grafana to start
 - name: "Wait for grafana to be started"

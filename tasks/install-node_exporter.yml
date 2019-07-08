@@ -2,9 +2,13 @@
 - name: Create node_exporter container
   docker_container:
     name: node_exporter
-    #command:  --collectors.enabled
     hostname: "{{ node_exporter_hostname }}"
-    image: prom/node-exporter
+    image: "{{ node_exporter_image }}"
+    command: "{% for key in node_exporter_commandline_args %}--{{ key }}={{ node_exporter_commandline_args[key] }} {% endfor %}"
+    volumes:
+      - "/:/host:ro,rslave"
     published_ports:
       - 9100:9100
     restart_policy: always
+    pid_mode: host
+    network_mode: host

@@ -1,8 +1,19 @@
 ---
 - include: install.yml
-- { include: install-prometheus.yml, when: install_prometheus == true }
-- { include: install-alertmanager.yml, when: install_alertmanager == true }
-- { include: install-blackbox_exporter.yml, when: install_blackbox_exporter == true }
-- { include: install-node_exporter.yml, when: install_node_exporter == true }
-- { include: install-grafana.yml, when: install_grafana == true }
+
+- include: install-prometheus.yml
+  when: install_prometheus
+
+- include: install-alertmanager.yml
+  when: install_alertmanager
+
+- include: install-blackbox_exporter.yml
+  when: install_blackbox_exporter
+
+- include: install-node_exporter.yml
+  when: install_node_exporter
+
+- include: install-grafana.yml
+  when: install_grafana
+
 - include: self-test.yml
