@@ -70,12 +70,14 @@ prometheus_telegraf_rules_config_default:
   CPUUsage:
     name: CPUUsage
     threshold: 90
+    severity: warning
   MemoryUsage:
     name: MemoryUsage
     threshold: 90
   LoadAverage:
     name: LoadAverage
-    threshold: 2.5
+    threshold: 6
+    severity: warning
   LowDiskSpace:
     name: LowDiskSpace
     threshold: 90
