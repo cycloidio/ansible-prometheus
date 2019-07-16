@@ -15,7 +15,7 @@
 
 - name: install deps (RHEL)
   yum: >
-    pkg={{item}}
+    pkg={{ item }}
     state=installed
   with_items:
     - unzip
@@ -25,8 +25,8 @@
 
 - name: python deps
   pip: >
-    name={{item.name}}
-    state={{item.state}}
+    name={{ item.name }}
+    state={{ item.state }}
   with_items:
     - { name: docker-py, state: absent }
     - { name: docker, state: present }

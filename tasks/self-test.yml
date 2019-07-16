@@ -17,7 +17,7 @@
       fail: msg='Prometheus not running, unable to curl index page'
       when: "'<title>Prometheus' not in result['content']"
 
-  when: install_prometheus == true
+  when: install_prometheus
 
 - name: "Check alertmanager running"
   block:
@@ -34,7 +34,7 @@
       fail: msg='Prometheus not running, unable to curl index page'
       when: "'<title>Alertmanager' not in result['content']"
 
-  when: install_alertmanager == true
+  when: install_alertmanager
 
 - name: "Check grafana running"
   block:
@@ -51,4 +51,4 @@
       fail: msg='Prometheus not running, unable to curl index page'
       when: "'<title>Grafana' not in result['content']"
 
-  when: install_grafana == true
+  when: install_grafana

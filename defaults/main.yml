@@ -1,60 +1,48 @@
 ---
-path: /srv/
+path: /opt/
 
-prometheus_version: latest
+#
+# General
+#
+
 install_prometheus: true
 install_alertmanager: true
 install_blackbox_exporter: false
 install_node_exporter: false
 install_grafana: false
 
-prometheus_restart_handler: restart prometheus
-alertmanager_restart_handler: restart alertmanager
-blackbox_exporter_restart_handler: restart blackbox_exporter
-grafana_restart_handler: restart grafana
-
+#
+# Prometheus
+#
+prometheus_version: latest
+prometheus_image: "prom/prometheus:{{ prometheus_version }}"
 prometheus_hostname: "{{ ansible_fqdn }}"
-alertmanager_hostname: "{{ ansible_fqdn }}"
-blackbox_exporter_hostname: blackbox-exporter
-node_exporter_hostname: "{{ ansible_fqdn }}"
-grafana_hostname: "{{ ansible_fqdn }}"
-
-# Lets prometheus know where to send alerts
-alertmanager_ip: "{{ ansible_default_ipv4.address }}"
 prometheus_ip: "{{ ansible_default_ipv4.address }}"
-# Enable some default alerts. You should add your own custom ones.
-default_alert_rules: true
+prometheus_restart_handler: restart prometheus
 
-# Prometheus configuration file
-prometheus_scrape_interval: 15s
-prometheus_evaluation_interval: 15s
-prometheus_external_labels: ''
 prometheus_commandline_args:
   config.file: "/prometheus-data/prometheus.yml"
   storage.tsdb.path: "/prometheus-data/data"
   web.external-url: "{{ prometheus_hostname }}"
-prometheus_image: "prom/prometheus:{{ prometheus_version }}"
 
-alertmanager_commandline_args:
-  config.file: "/alertmanager/alertmanager.yml"
-  web.external-url: "http://{{ alertmanager_hostname }}"
-alertmanager_version: latest
-alertmanager_image: "prom/alertmanager:{{ alertmanager_version }}"
+prometheus_scrape_interval: 15s
+prometheus_evaluation_interval: 15s
+prometheus_external_labels: ''
+
+# Enable some default alerts. You should add your own custom ones.
+default_alert_rules: true
 
 # Fileglobs loop format
 # http://docs.ansible.com/ansible/latest/playbooks_loops.html#id4
 prometheus_rule_files: []
 # Example :
-#  - templates/opsgenie.rules
-#  - templates/telegraf.rules
-#  - templates/telegraf-elasticsearch.rules
-#  - templates/telegraf-redis.rules
+#  - templates/rules/opsgenie.rules
+#  - templates/rules/telegraf.rules
+#  - templates/rules/telegraf-elasticsearch.rules
+#  - templates/rules/telegraf-redis.rules
 
 # If set, will add UUID labels on alert rules.
 prometheus_alerts_uuid: ""
-
-alertmanager_template_files:
-  - files/alertmanager_templates/*.tmpl
 
 # Telegraf rules
 prometheus_telegraf_rules_config: {}
@@ -70,12 +58,14 @@ prometheus_telegraf_rules_config_default:
   CPUUsage:
     name: CPUUsage
     threshold: 90
+    severity: warning
   MemoryUsage:
     name: MemoryUsage
     threshold: 90
   LoadAverage:
     name: LoadAverage
-    threshold: 2.5
+    threshold: 6
+    severity: warning
   LowDiskSpace:
     name: LowDiskSpace
     threshold: 90
@@ -85,38 +75,46 @@ prometheus_telegraf_rules_config_default:
   InstanceDown:
     name: InstanceDown
     selector: env !~ "dev|demo|preprod|staging"
+
   HttpResponseCode:
     name: HttpResponseCode
     threshold: 302
   HttpResponseStringMatch:
     name: HttpResponseStringMatch
     threshold: 0
+
   LbCertsExpireCheck:
     name: LbCertsExpireCheck
     threshold: 30
+
   SesSentQuota:
     name: SesSentQuota
     threshold: 90
   SesReputation:
     name: SesReputation
     threshold: 10
+
   EC2CpuCreditBalance:
     name: EC2CpuCreditBalance
     threshold: 25
+  EC2Events:
+    name: EC2Events
+
   RDSCpuCreditBalance:
     name: RDSCpuCreditBalance
     threshold: 25
-  EC2Events:
-    name: EC2Events
   RDSEvents:
     name: RDSEvents
+
   OpsgenieHeartbeat:
     name: OpsgenieHeartbeat
     receiver: opsgenie_heartbeat
+
   EventstoreIsAlive:
     name: EventstoreIsAlive
   EventstoreCheckError:
     name: EventstoreCheckError
+
   ElasticsearchTooFewNodesRunning:
     name: ElasticsearchTooFewNodesRunning
     threshold: 3
@@ -128,6 +126,7 @@ prometheus_telegraf_rules_config_default:
     name: ElasticsearchCPUTooHigh
     for: 15m
     threshold: 90
+
   RedisMemoryUsageTooHigh:
     name: RedisMemoryUsageTooHigh
     threshold: 90
@@ -149,11 +148,13 @@ prometheus_scrape_configs:
   scrape_timeout:  10s
   static_configs:
     - targets: ['localhost:9090']
+
 - job_name: 'node_exporter'
   scrape_interval: 5s
   static_configs:
     - targets:
       - "{{ ansible_default_ipv4.address }}:9100"
+
 prometheus_rules:
 - '/prometheus-data/*.rules'
 
@@ -164,7 +165,23 @@ prometheus_alerting:
     - targets:
       - "{{ alertmanager_ip }}:9093"
 
-# Alertmanager configuration file
+
+#
+# Alertmanager
+#
+alertmanager_version: latest
+alertmanager_image: "prom/alertmanager:{{ alertmanager_version }}"
+alertmanager_hostname: "{{ ansible_fqdn }}"
+alertmanager_ip: "{{ ansible_default_ipv4.address }}"
+alertmanager_restart_handler: restart alertmanager
+
+alertmanager_commandline_args:
+  config.file: "/alertmanager/alertmanager.yml"
+  web.external-url: "http://{{ alertmanager_hostname }}"
+
+alertmanager_template_files:
+  - files/alertmanager/templates/*.tmpl
+
 alertmanager_route:
   group_wait: 30s
   group_interval: 2m
@@ -181,8 +198,10 @@ alertmanager_route:
   - cluster
   - alertname
   - host
+
 alertmanager_templates:
 - '/alertmanager/template/*.tmpl'
+
 alertmanager_inhibit_rules:
 - source_match:
     severity: critical
@@ -191,10 +210,23 @@ alertmanager_inhibit_rules:
   equal:
   - alertname
   - host
+
 alertmanager_receivers:
 - name: 'webhook'
   webhook_configs:
   - url: 'http://127.0.0.1:5001/'
+
+
+#
+# Blackbox exporter
+#
+blackbox_exporter_version: latest
+blackbox_exporter_image: "prom/blackbox-exporter:{{ blackbox_exporter_version }}"
+blackbox_exporter_hostname: blackbox-exporter
+blackbox_exporter_restart_handler: restart blackbox_exporter
+
+blackbox_exporter_commandline_args:
+  config.file: "/blackbox-data/blackbox_exporter.yml"
 
 blackbox_exporter_modules:
   http_2xx:
@@ -210,21 +242,40 @@ blackbox_exporter_modules:
       fail_if_ssl: false
       fail_if_not_ssl: false
 
+
+#
+# Node exporter
+#
+node_exporter_version: latest
+node_exporter_image: "prom/node-exporter:{{ node_exporter_version }}"
+node_exporter_hostname: "{{ ansible_fqdn }}"
+
+node_exporter_commandline_args:
+  path.rootfs: "/host"
+
+
 #
 # Grafana
 #
 
-grafana_version: 4.5.0
+grafana_version: latest
 grafana_image: "grafana/grafana:{{ grafana_version }}"
+grafana_hostname: "{{ ansible_fqdn }}"
+grafana_restart_handler: restart grafana
+
+grafana_admin_password: admin
+
 grafana_database_type: mysql
 grafana_database_host: "localhost:3306"
 grafana_database_name: grafana
 grafana_database_user: grafana
 grafana_database_password: s3cr3t
-grafana_admin_password: admin
 
 # Doc here for the dashboards format http://docs.grafana.org/reference/dashboard/
 grafana_dashboards_files: []
+
+# Doc here for the dashboards format https://grafana.com/docs/administration/provisioning/
+grafana_provisioning_files: []
 
 grafana_default_datasource:
   name: "prometheus"

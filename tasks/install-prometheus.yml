@@ -2,9 +2,9 @@
 - name: Create prometheus container
   docker_container:
     name: prometheus
-    command: "{% for key in prometheus_commandline_args %}--{{key}}={{prometheus_commandline_args[key]}} {% endfor %}"
     hostname: "{{ prometheus_hostname }}"
     image: "{{ prometheus_image }}"
+    command: "{% for key in prometheus_commandline_args %}--{{ key }}={{ prometheus_commandline_args[key] }} {% endfor %}"
     volumes:
       - "{{ path }}/prometheus-data:/prometheus-data"
     published_ports:
