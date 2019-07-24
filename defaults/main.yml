@@ -1,15 +1,20 @@
 ---
 path: /opt/
 
+# install_mode can be either docker or system
+# currently only mongodb_exporter is supported with `install_mode: system`
+install_mode: docker
+
 #
 # General
 #
 
-install_prometheus: true
-install_alertmanager: true
+install_prometheus: false
+install_alertmanager: false
 install_blackbox_exporter: false
 install_node_exporter: false
 install_grafana: false
+install_mongodb_exporter: false
 
 #
 # Prometheus
@@ -18,7 +23,7 @@ prometheus_version: latest
 prometheus_image: "prom/prometheus:{{ prometheus_version }}"
 prometheus_hostname: "{{ ansible_fqdn }}"
 prometheus_ip: "{{ ansible_default_ipv4.address }}"
-prometheus_restart_handler: restart prometheus
+prometheus_restart_handler: "{% if install_mode == 'docker' %}restart docker prometheus{% else %}restart prometheus{% endif %}"
 
 prometheus_commandline_args:
   config.file: "/prometheus-data/prometheus.yml"
@@ -40,9 +45,18 @@ prometheus_rule_files: []
 #  - templates/rules/telegraf.rules
 #  - templates/rules/telegraf-elasticsearch.rules
 #  - templates/rules/telegraf-redis.rules
+#  - templates/rules/mongodb_exporter.rules
 
 # If set, will add UUID labels on alert rules.
 prometheus_alerts_uuid: ""
+
+# Top global scope level to define default variable for each checks
+# You should not have to override this variable
+prometheus_rules_default_root:
+  for: 5m
+  receiver: on_call
+  selector: ""
+  severity: critical
 
 # Telegraf rules
 prometheus_telegraf_rules_config: {}
@@ -131,15 +145,31 @@ prometheus_telegraf_rules_config_default:
     name: RedisMemoryUsageTooHigh
     threshold: 90
 
-# Top global scope level to define default variable for each checks
-# You should not have to override this variable
-prometheus_telegraf_rules_default_root:
-  for: 5m
-  receiver: on_call
-  selector: ""
-  severity: critical
+  MongodbReplicationLag:
+    name: MongodbReplicationLag
+    threshold: 10
+    severity: warning
+  MongodbReplicationStatus3:
+    name: MongodbReplicationStatus3
+    severity: warning
+  MongodbReplicationStatus6:
+    name: MongodbReplicationStatus6
+    severity: warning
+  MongodbReplicationStatus8:
+    name: MongodbReplicationStatus8
+    severity: warning
+  MongodbReplicationStatus9:
+    name: MongodbReplicationStatus9
+    severity: warning
+  MongodbReplicationStatus10:
+    name: MongodbReplicationStatus10
+    severity: warning
+  MongodbNumberCursorsOpen:
+    name: MongodbNumberCursorsOpen
+    threshold: 10000
+    severity: warning
 
-_prometheus_telegraf_rules_default_global: "{{ prometheus_telegraf_rules_default_root | combine(prometheus_telegraf_rules_default_global) }}"
+_prometheus_telegraf_rules_default_global: "{{ prometheus_rules_default_root | combine(prometheus_telegraf_rules_default_global) }}"
 
 # See https://prometheus.io/docs/operating/configuration/#<scrape_config>
 prometheus_scrape_configs:
@@ -173,7 +203,7 @@ alertmanager_version: latest
 alertmanager_image: "prom/alertmanager:{{ alertmanager_version }}"
 alertmanager_hostname: "{{ ansible_fqdn }}"
 alertmanager_ip: "{{ ansible_default_ipv4.address }}"
-alertmanager_restart_handler: restart alertmanager
+alertmanager_restart_handler: "{% if install_mode == 'docker' %}restart docker alertmanager{% else %}restart alertmanager{% endif %}"
 
 alertmanager_commandline_args:
   config.file: "/alertmanager/alertmanager.yml"
@@ -223,7 +253,7 @@ alertmanager_receivers:
 blackbox_exporter_version: latest
 blackbox_exporter_image: "prom/blackbox-exporter:{{ blackbox_exporter_version }}"
 blackbox_exporter_hostname: blackbox-exporter
-blackbox_exporter_restart_handler: restart blackbox_exporter
+blackbox_exporter_restart_handler: "{% if install_mode == 'docker' %}restart docker blackbox_exporter{% else %}restart blackbox_exporter{% endif %}"
 
 blackbox_exporter_commandline_args:
   config.file: "/blackbox-data/blackbox_exporter.yml"
@@ -249,6 +279,7 @@ blackbox_exporter_modules:
 node_exporter_version: latest
 node_exporter_image: "prom/node-exporter:{{ node_exporter_version }}"
 node_exporter_hostname: "{{ ansible_fqdn }}"
+node_exporter_restart_handler: "{% if install_mode == 'docker' %}restart docker node_exporter{% else %}restart node_exporter{% endif %}"
 
 node_exporter_commandline_args:
   path.rootfs: "/host"
@@ -261,7 +292,7 @@ node_exporter_commandline_args:
 grafana_version: latest
 grafana_image: "grafana/grafana:{{ grafana_version }}"
 grafana_hostname: "{{ ansible_fqdn }}"
-grafana_restart_handler: restart grafana
+grafana_restart_handler: "{% if install_mode == 'docker' %}restart docker grafana{% else %}restart grafana{% endif %}"
 
 grafana_admin_password: admin
 
@@ -284,3 +315,79 @@ grafana_default_datasource:
   access: "proxy"
   basicAuth: false
   isDefault: true
+
+#
+# MongoDB exporter
+#
+mongodb_exporter_version: 0.8.0
+mongodb_exporter_restart_handler: "{% if install_mode == 'docker' %}restart docker mongodb_exporter{% else %}restart mongodb_exporter{% endif %}"
+
+# MongoDB URI in format [mongodb://][user:pass@]host1[:port1][,host2[:port2],...][/database][?options]
+mongodb_exporter_mongodb_uri: "mongodb://{{ ansible_default_ipv4.address }}:27017"
+
+mongodb_exporter_port: 9216
+
+mongodb_exporter_env_vars: []
+
+mongodb_exporter_commandline_args:
+  web.listen-address: ":{{ mongodb_exporter_port }}"
+  mongodb.uri: "{{ mongodb_exporter_mongodb_uri }}"
+  collect.database: true
+  collect.collection: true
+  collect.topmetrics: true
+  collect.indexusage: true
+
+# docker install
+mongodb_exporter_hostname: "{{ ansible_fqdn }}"
+mongodb_exporter_image: "ssheehy/mongodb-exporter:{{ node_exporter_version }}"
+
+# system install
+mongodb_exporter_install_path: "{{ path }}/mongodb_exporter"
+mongodb_exporter_base_url: https://github.com/percona/mongodb_exporter
+mongodb_exporter_release_url: "{{ mongodb_exporter_base_url }}/releases/download/v{{ mongodb_exporter_version }}/mongodb_exporter-{{ mongodb_exporter_version }}.{{ ansible_system |lower }}-amd64.tar.gz"
+mongodb_exporter_system_user: mongodb_exporter
+mongodb_exporter_system_groups: ['mongodb_exporter']
+
+# rules
+mongodb_exporter_prometheus_rules_config: {}
+# mongodb_exporter_prometheus_rules_config:
+#   MongodbReplicationLag:
+#     - name: MongodbReplicationLagProd
+#         threshold: 5
+#     - name: MongodbReplicationLagStaging
+
+mongodb_exporter_prometheus_rules_default_global: {}
+
+mongodb_exporter_prometheus_rules_config_default:
+  MongodbReplicationLag:
+    name: MongodbReplicationLag
+    threshold: 10
+    severity: warning
+  MongodbReplicationHeadroom:
+    name: MongodbReplicationHeadroom
+    threshold: 0
+    severity: warning
+  MongodbReplicationStatus3:
+    name: MongodbReplicationStatus3
+  MongodbReplicationStatus6:
+    name: MongodbReplicationStatus6
+  MongodbReplicationStatus8:
+    name: MongodbReplicationStatus8
+  MongodbReplicationStatus9:
+    name: MongodbReplicationStatus9
+  MongodbReplicationStatus10:
+    name: MongodbReplicationStatus10
+  MongodbNumberCursorsOpen:
+    name: MongodbNumberCursorsOpen
+    threshold: 10000
+    severity: warning
+  MongodbCursorsTimeouts:
+    name: MongodbCursorsTimeouts
+    threshold: 100
+    severity: warning
+  MongodbTooManyConnections:
+    name: MongodbTooManyConnections
+    threshold: 500
+    severity: warning
+
+_mongodb_exporter_prometheus_rules_default_global: "{{ prometheus_rules_default_root | combine(mongodb_exporter_prometheus_rules_default_global) }}"

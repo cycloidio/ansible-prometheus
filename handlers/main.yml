@@ -1,16 +1,28 @@
 ---
-- name: restart prometheus
+- name: restart docker prometheus
   become: yes
   command: docker restart prometheus
 
-- name: restart alertmanager
+- name: restart docker alertmanager
   become: yes
   command: docker restart alertmanager
 
-- name: restart blackbox_exporter
+- name: restart docker blackbox_exporter
   become: yes
   command: docker restart blackbox_exporter
 
-- name: restart grafana
+- name: restart docker grafana
   become: yes
   command: docker restart grafana
+
+- name: restart mongodb_exporter
+  become: yes
+  systemd:
+    name: mongodb_exporter.service
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+
+- name: restart docker mongodb_exporter
+  become: yes
+  command: docker restart mongodb_exporter

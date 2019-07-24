@@ -1,52 +1,60 @@
 ---
-- name: Create prometheus container
-  docker_container:
-    name: prometheus
-    hostname: "{{ prometheus_hostname }}"
-    image: "{{ prometheus_image }}"
-    command: "{% for key in prometheus_commandline_args %}--{{ key }}={{ prometheus_commandline_args[key] }} {% endfor %}"
-    volumes:
-      - "{{ path }}/prometheus-data:/prometheus-data"
-    published_ports:
-      - 9090:9090
-    restart_policy: always
+- name: Install on system
+  fail: msg="blackbox_exporter 'system' install_mode not yet supported"
+  when: install_mode == 'system'
 
-- name: ensure prometheus data directory owner is nobody
-  file: >
-    path="{{ path }}/prometheus-data"
-    owner=nobody
-    group=nogroup
-    mode=0740
-    state=directory
+- name: Install with docker
+  block:
+    - name: Create prometheus container
+      docker_container:
+        name: prometheus
+        hostname: "{{ prometheus_hostname }}"
+        image: "{{ prometheus_image }}"
+        command: "{% for key in prometheus_commandline_args %}--{{ key }}={{ prometheus_commandline_args[key] }} {% endfor %}"
+        volumes:
+          - "{{ path }}/prometheus-data:/prometheus-data"
+        published_ports:
+          - 9090:9090
+        restart_policy: always
 
-- name: copy prometheus config file
-  template: >
-    src=templates/prometheus.yml.j2
-    dest="{{ path }}/prometheus-data/prometheus.yml"
-    owner=root
-    group=nogroup
-    mode=0640
-  notify:
-    - "{{ prometheus_restart_handler }}"
+    - name: ensure prometheus data directory owner is nobody
+      file: >
+        path="{{ path }}/prometheus-data"
+        owner=nobody
+        group=nogroup
+        mode=0740
+        state=directory
 
-- name: copy prometheus alert rules
-  copy: >
-    src=files/alert.rules
-    dest="{{ path }}/prometheus-data/alert.rules"
-    owner=root
-    group=nogroup
-    mode=0640
-  notify:
-    - "{{ prometheus_restart_handler }}"
-  when: default_alert_rules == true
+    - name: copy prometheus config file
+      template: >
+        src=templates/prometheus.yml.j2
+        dest="{{ path }}/prometheus-data/prometheus.yml"
+        owner=root
+        group=nogroup
+        mode=0640
+      notify:
+        - "{{ prometheus_restart_handler }}"
 
-- name: copy prometheus rules
-  template: >
-    src="{{ item }}"
-    dest="{{ path }}/prometheus-data/{{ item | basename }}"
-    owner=root
-    group=nogroup
-    mode=0640
-  with_fileglob: "{{ prometheus_rule_files }}"
-  notify:
-    - "{{ prometheus_restart_handler }}"
+    - name: copy prometheus alert rules
+      copy: >
+        src=files/alert.rules
+        dest="{{ path }}/prometheus-data/alert.rules"
+        owner=root
+        group=nogroup
+        mode=0640
+      notify:
+        - "{{ prometheus_restart_handler }}"
+      when: default_alert_rules
+
+    - name: copy prometheus rules
+      template: >
+        src="{{ item }}"
+        dest="{{ path }}/prometheus-data/{{ item | basename }}"
+        owner=root
+        group=nogroup
+        mode=0640
+      with_fileglob: "{{ prometheus_rule_files }}"
+      notify:
+        - "{{ prometheus_restart_handler }}"
+
+  when: install_mode == 'docker'

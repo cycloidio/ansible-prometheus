@@ -1,0 +1,235 @@
+groups:
+
+- name: mongodb_exporter.rules
+  rules:
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationLag', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationLag']) | combine(user_config) %}
+
+  # alert if Mongodb replication lag is more than 10s
+  - alert: {{ c['name'] }}
+    #expr: avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="PRIMARY" {{ c['selector'] }} }) - avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="SECONDARY" {{ c['selector'] }} }) > {{ c['threshold'] }}
+    expr: mongodb_mongod_replset_member_replication_lag{ {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Mongodb replication lag is more than {{ c['threshold'] }}s (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication lag'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationHeadroom', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationHeadroom']) | combine(user_config) %}
+
+  # alert if MongoDB replication headroom is <= 0
+  - alert: {{ c['name'] }}
+    expr: (avg by (client, customer, project, role, env) (mongodb_mongod_replset_oplog_head_timestamp{ {{ c['selector'] }} } - mongodb_mongod_replset_oplog_tail_timestamp{ {{ c['selector'] }} }) - (avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="PRIMARY" {{ c['selector'] }} }) - avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="SECONDARY" {{ c['selector'] }} }))) <= {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication headroom is <= {{ c['threshold'] }} (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication headroom'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationStatus3', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationStatus3']) | combine(user_config) %}
+
+  # alert if MongoDB Replication set member either perform startup self-checks, or transition from completing a rollback or resync
+  - alert: {{ c['name'] }}
+    expr: mongodb_mongod_replset_member_state{ {{ c['selector'] }} } == 3
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB Replication set member either perform startup self-checks, or transition from completing a rollback or resync (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication Status 3 (RECOVERING)'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationStatus6', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationStatus6']) | combine(user_config) %}
+
+  # alert if MongoDB Replication set member as seen from another member of the set, is not yet known
+  - alert: {{ c['name'] }}
+    expr: mongodb_mongod_replset_member_state{ {{ c['selector'] }} } == 6
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB Replication set member as seen from another member of the set, is not yet known (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication Status 6 (UNKNOWN)'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationStatus8', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationStatus8']) | combine(user_config) %}
+
+  # alert if MongoDB Replication set member as seen from another member of the set, is unreachable
+  - alert: {{ c['name'] }}
+    expr: mongodb_mongod_replset_member_state{ {{ c['selector'] }} } == 8
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB Replication set member as seen from another member of the set, is unreachable (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication Status 8 (DOWN)'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationStatus9', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationStatus9']) | combine(user_config) %}
+
+  # alert if MongoDB Replication set member is actively performing a rollback. Data is not available for reads
+  - alert: {{ c['name'] }}
+    expr: mongodb_mongod_replset_member_state{ {{ c['selector'] }} } == 9
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB Replication set member is actively performing a rollback. Data is not available for reads (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication Status 9 (ROLLBACK)'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbReplicationStatus10', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbReplicationStatus10']) | combine(user_config) %}
+
+  # alert if MongoDB Replication set member was once in a replica set but was subsequently removed
+  - alert: {{ c['name'] }}
+    expr: mongodb_mongod_replset_member_state{ {{ c['selector'] }} } == 10
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB Replication set member was once in a replica set but was subsequently removed (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB replication Status 10 (REMOVED)'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbNumberCursorsOpen', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbNumberCursorsOpen']) | combine(user_config) %}
+
+  # alert if Too many cursors opened by MongoDB for clients (> 10k)
+  - alert: {{ c['name'] }}
+    expr: mongodb_mongod_metrics_cursor_open{state="total_open" {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Too many cursors opened by MongoDB for clients (> {{ c['threshold'] }}) (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB number cursors open'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbCursorsTimeouts', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbCursorsTimeouts']) | combine(user_config) %}
+
+  # alert if Too many cursors are timing out
+  - alert: {{ c['name'] }}
+    expr: increase(mongodb_mongod_metrics_cursor_timed_out_total{ {{ c['selector'] }} }[10m]) > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Too many cursors are timing out (> {{ c['threshold'] }}) (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB cursors timeouts'
+{% endfor %}
+
+{% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbTooManyConnections', [{}]) %}
+  {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbTooManyConnections']) | combine(user_config) %}
+
+  # alert if Too many connections
+  - alert: {{ c['name'] }}
+    expr: mongodb_connections{state="current" {{ c['selector'] }} } > {{ c['threshold'] }}
+    for: {{ c['for'] }}
+    labels:
+      {% raw -%}
+      customer: '{{ $labels.client }}'
+      project: '{{ $labels.project }}'
+      role: '{{ $labels.role }}'
+      env: '{{ $labels.env }}'
+      {% endraw -%}
+      severity: {{ c['severity'] }}
+      receiver: {{ c['receiver'] }}
+      {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
+
+    annotations:
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Too many connections (> {{ c['threshold'] }}) (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB too many connections'
+{% endfor %}

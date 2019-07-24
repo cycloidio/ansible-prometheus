@@ -30,3 +30,5 @@
   with_items:
     - { name: docker-py, state: absent }
     - { name: docker, state: present }
+  
+  when: install_mode == 'docker'

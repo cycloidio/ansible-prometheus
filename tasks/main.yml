@@ -1,4 +1,8 @@
 ---
+- name: "Check required variables"
+  fail: msg="Variable 'install_mode' can be either 'docker' or 'system'"
+  when: install_mode not in ['docker', 'system']
+
 - include: install.yml
 
 - include: install-prometheus.yml
@@ -7,13 +11,16 @@
 - include: install-alertmanager.yml
   when: install_alertmanager
 
+- include: install-grafana.yml
+  when: install_grafana
+
 - include: install-blackbox_exporter.yml
   when: install_blackbox_exporter
 
 - include: install-node_exporter.yml
   when: install_node_exporter
 
-- include: install-grafana.yml
-  when: install_grafana
+- include: install-mongodb_exporter.yml
+  when: install_mongodb_exporter
 
 - include: self-test.yml

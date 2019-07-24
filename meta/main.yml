@@ -1,15 +1,16 @@
 ---
 galaxy_info:
-  author: Merritt Krakowitzer
-  description: Install prometheus monitoring components as dockerized containers
+  author: cycloid.io
+  company: cycloid.io
+  description: Install prometheus monitoring components on the system or as dockerized containers
   license: MIT
   platforms:
+    - name: Debian
+      versions:
+        - all
     - name: Ubuntu
       versions:
-        - precise
-        - trusty
-        - wily
-        - xenial
+        - all
     - name: EL
       versions:
         - 6
@@ -18,8 +19,13 @@ galaxy_info:
     - monitoring
     - prometheus
     - alertmanager
+    - grafana
+    - blackbox_exporter
+    - node_exporter
+    - mongodb_exporter
     - system
+    - docker
     - cloud
-  min_ansible_version: 2.1
+  min_ansible_version: 2.6
 dependencies: []
-  #- { role: dochang.docker }
+  #- { role: geerlingguy.docker }
