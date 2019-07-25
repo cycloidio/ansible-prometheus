@@ -1,34 +1,19 @@
 ---
-- name: install deps (Ubuntu)
-  apt: >
-    pkg={{item}}
-    state=installed
-  with_items:
-    - python-setuptools
-    - jq
-  when: ansible_os_family == "Debian"
-
-- name: easy_install deps (Ubuntu)
-  easy_install:
-    name: pip
-  when: ansible_os_family == "Debian"
-
-- name: install deps (RHEL)
-  yum: >
-    pkg={{ item }}
-    state=installed
+- name: install deps
+  package:
+    name: "{{ item }}"
+    state: installed
   with_items:
     - unzip
     - jq
     - python-pip
-  when: ansible_os_family == "RedHat"
 
 - name: python deps
-  pip: >
-    name={{ item.name }}
-    state={{ item.state }}
+  pip:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
   with_items:
     - { name: docker-py, state: absent }
     - { name: docker, state: present }
-  
+
   when: install_mode == 'docker'
