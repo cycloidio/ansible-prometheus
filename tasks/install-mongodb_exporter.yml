@@ -1,0 +1,77 @@
+---
+
+- name: Install on system
+  block:
+    - name: Add system groups
+      group:
+        name: "{{ item }}"
+      with_items:
+        - "{{ mongodb_exporter_system_groups }}"
+
+    - name: Add system user
+      user:
+        name: "{{ mongodb_exporter_system_user }}"
+        groups: "{{ mongodb_exporter_system_groups }}"
+
+    - name: Make sure destination path exists
+      file:
+        path: "{{ mongodb_exporter_install_path }}"
+        state: directory
+        owner: "{{ mongodb_exporter_system_user }}"
+        group: "{{ mongodb_exporter_system_groups[0] }}"
+
+    - name: Download precompiled binary
+      unarchive:
+        src: "{{ mongodb_exporter_release_url }}"
+        dest: "{{ mongodb_exporter_install_path }}"
+        owner: "{{ mongodb_exporter_system_user }}"
+        group: "{{ mongodb_exporter_system_groups[0] }}"
+        mode: 0644
+        remote_src: yes
+      notify:
+        - "{{ mongodb_exporter_restart_handler }}"
+      
+    - name: Make sure the binary is executable
+      file:
+        path: "{{ mongodb_exporter_install_path}}/mongodb_exporter"
+        mode: 0755
+      notify:
+        - "{{ mongodb_exporter_restart_handler }}"
+
+    - name: Create drop-in systemd file with preset environment variables
+      template:
+        src: mongodb_exporter/environment.conf.j2
+        dest: /etc/systemd/system/mongodb_exporter.service.d/environment.conf
+        owner: root
+        group: root
+        mode: 0640
+      when: mongodb_exporter_env_vars |length > 0
+      notify:
+        - "{{ mongodb_exporter_restart_handler }}"
+
+    - name: Create systemd service file
+      template:
+        src: mongodb_exporter/mongodb_exporter.service.j2
+        dest: /etc/systemd/system/mongodb_exporter.service
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - "{{ mongodb_exporter_restart_handler }}"
+
+  when: install_mode == 'system'
+
+- name: Install with docker
+  block:
+    - name: Create mongodb_exporter container
+      docker_container:
+        name: mongodb_exporter
+        hostname: "{{ mongodb_exporter_hostname }}"
+        image: "{{ mongodb_exporter_image }}"
+        env: "{{ mongodb_exporter_env_vars }}"
+        command: "{% for key in mongodb_exporter_commandline_args %}--{{ key }}{% if mongodb_exporter_commandline_args[key] is not sameas true %}={{ mongodb_exporter_commandline_args[key] }}{% endif %} {% endfor %}"
+        published_ports:
+          - "{{ mongodb_exporter_port }}:{{ mongodb_exporter_port }}"
+        restart_policy: always
+
+  when: install_mode == 'docker'

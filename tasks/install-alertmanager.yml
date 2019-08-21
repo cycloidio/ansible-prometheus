@@ -1,49 +1,57 @@
 ---
-- name: Create alertmanager container
-  docker_container:
-    name: alertmanager
-    hostname: "{{ alertmanager_hostname }}"
-    image: "{{ alertmanager_image }}"
-    command: "{% for key in alertmanager_commandline_args %}--{{key}}={{alertmanager_commandline_args[key]}} {% endfor %}"
-    volumes:
-      - "{{ path }}/alertmanager:/alertmanager"
-    published_ports:
-      - 9093:9093
-    restart_policy: always
+- name: Install on system
+  fail: msg="Alertmanager 'system' install_mode not yet supported"
+  when: install_mode == 'system'
 
-- name: Ensure alertmanager templates directory exist
-  file: >
-    path="{{ path }}/alertmanager/template"
-    owner=nobody
-    group=nogroup
-    mode=0740
-    state=directory
+- name: Install with docker
+  block:
+    - name: Create alertmanager container
+      docker_container:
+        name: alertmanager
+        hostname: "{{ alertmanager_hostname }}"
+        image: "{{ alertmanager_image }}"
+        command: "{% for key in alertmanager_commandline_args %}--{{key}}={{alertmanager_commandline_args[key]}} {% endfor %}"
+        volumes:
+          - "{{ path }}/alertmanager:/alertmanager"
+        published_ports:
+          - 9093:9093
+        restart_policy: always
 
-- name: Ensure alertmanager data directory exist
-  file: >
-    path="{{ path }}/alertmanager/data"
-    owner=nobody
-    group=nogroup
-    mode=0740
-    state=directory
+    - name: Ensure alertmanager templates directory exist
+      file: >
+        path="{{ path }}/alertmanager/template"
+        owner=nobody
+        group=nogroup
+        mode=0740
+        state=directory
 
-- name: copy alertmanager config file
-  template: >
-    src=templates/alertmanager.yml.j2
-    dest="{{ path }}/alertmanager/alertmanager.yml"
-    owner=root
-    group=nogroup
-    mode=0640
-  notify:
-    - "{{ alertmanager_restart_handler }}"
+    - name: Ensure alertmanager data directory exist
+      file: >
+        path="{{ path }}/alertmanager/data"
+        owner=nobody
+        group=nogroup
+        mode=0740
+        state=directory
 
-- name: copy alertmanager templates
-  copy: >
-    src="{{ item }}"
-    dest="{{ path }}/alertmanager/template/{{ item | basename }}"
-    owner=root
-    group=nogroup
-    mode=0640
-  with_fileglob: "{{ alertmanager_template_files }}"
-  notify:
-    - "{{ alertmanager_restart_handler }}"
+    - name: copy alertmanager config file
+      template: >
+        src=templates/alertmanager.yml.j2
+        dest="{{ path }}/alertmanager/alertmanager.yml"
+        owner=root
+        group=nogroup
+        mode=0640
+      notify:
+        - "{{ alertmanager_restart_handler }}"
+
+    - name: copy alertmanager templates
+      copy: >
+        src="{{ item }}"
+        dest="{{ path }}/alertmanager/template/{{ item | basename }}"
+        owner=root
+        group=nogroup
+        mode=0640
+      with_fileglob: "{{ alertmanager_template_files }}"
+      notify:
+        - "{{ alertmanager_restart_handler }}"
+
+  when: install_mode == 'docker'

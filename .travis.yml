@@ -1,9 +1,0 @@
----
-sudo: required
-services: docker
-install:
-  - bundle install
-
-script:
-  - docker version
-  - kitchen test

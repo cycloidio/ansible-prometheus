@@ -1,22 +1,30 @@
 ---
-- name: Create blackbox  container
-  docker_container:
-    name: blackbox_exporter
-    hostname: "{{ blackbox_exporter_hostname }}"
-    image: "{{ blackbox_exporter_image }}"
-    command: "{% for key in blackbox_exporter_commandline_args %}--{{ key }}={{ blackbox_exporter_commandline_args[key] }} {% endfor %}"
-    volumes:
-      - "{{ path }}/blackbox-data:/blackbox-data"
-    published_ports:
-      - 9115:9115
-    restart_policy: always
+- name: Install on system
+  fail: msg="blackbox_exporter 'system' install_mode not yet supported"
+  when: install_mode == 'system'
 
-- name: copy blackbox config file
-  template: >
-    src=templates/blackbox_exporter.yml.j2
-    dest="{{ path }}/blackbox-data/blackbox_exporter.yml"
-    owner=root
-    group=root
-    mode=0640
-  notify:
-    - "{{ blackbox_exporter_restart_handler }}"
+- name: Install with docker
+  block:
+    - name: Create blackbox container
+      docker_container:
+        name: blackbox_exporter
+        hostname: "{{ blackbox_exporter_hostname }}"
+        image: "{{ blackbox_exporter_image }}"
+        command: "{% for key in blackbox_exporter_commandline_args %}--{{ key }}={{ blackbox_exporter_commandline_args[key] }} {% endfor %}"
+        volumes:
+          - "{{ path }}/blackbox-data:/blackbox-data"
+        published_ports:
+          - 9115:9115
+        restart_policy: always
+
+    - name: copy blackbox config file
+      template: >
+        src=templates/blackbox_exporter.yml.j2
+        dest="{{ path }}/blackbox-data/blackbox_exporter.yml"
+        owner=root
+        group=root
+        mode=0640
+      notify:
+        - "{{ blackbox_exporter_restart_handler }}"
+
+  when: install_mode == 'docker'

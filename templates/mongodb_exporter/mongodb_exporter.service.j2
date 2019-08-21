@@ -1,0 +1,17 @@
+#jinja2: lstrip_blocks: True
+[Unit]
+Description=Percona MongoDB Exporter
+After=syslog.target network.target
+
+[Service]
+Type=simple
+Restart=always
+
+User={{ mongodb_exporter_system_user }}
+Group={{ mongodb_exporter_system_groups[0] }}
+
+ExecStart={{ mongodb_exporter_install_path }}/mongodb_exporter \
+            {% for key in mongodb_exporter_commandline_args %}--{{ key }}{% if mongodb_exporter_commandline_args[key] is not sameas true %}={{ mongodb_exporter_commandline_args[key] }}{% endif %} {% endfor %}
+
+[Install]
+WantedBy=multi-user.target
