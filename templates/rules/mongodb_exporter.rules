@@ -8,12 +8,12 @@ groups:
 
   # alert if Mongodb replication lag is more than 10s
   - alert: {{ c['name'] }}
-    #expr: avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="PRIMARY" {{ c['selector'] }} }) - avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="SECONDARY" {{ c['selector'] }} }) > {{ c['threshold'] }}
+    #expr: avg by (customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="PRIMARY" {{ c['selector'] }} }) - avg by (customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="SECONDARY" {{ c['selector'] }} }) > {{ c['threshold'] }}
     expr: mongodb_mongod_replset_member_replication_lag{ {{ c['selector'] }} } > {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -32,11 +32,11 @@ groups:
 
   # alert if MongoDB replication headroom is <= 0
   - alert: {{ c['name'] }}
-    expr: (avg by (client, customer, project, role, env) (mongodb_mongod_replset_oplog_head_timestamp{ {{ c['selector'] }} } - mongodb_mongod_replset_oplog_tail_timestamp{ {{ c['selector'] }} }) - (avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="PRIMARY" {{ c['selector'] }} }) - avg by (client, customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="SECONDARY" {{ c['selector'] }} }))) <= {{ c['threshold'] }}
+    expr: (avg by (customer, project, role, env) (mongodb_mongod_replset_oplog_head_timestamp{ {{ c['selector'] }} } - mongodb_mongod_replset_oplog_tail_timestamp{ {{ c['selector'] }} }) - (avg by (customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="PRIMARY" {{ c['selector'] }} }) - avg by (customer, project, role, env) (mongodb_mongod_replset_member_optime_date{state="SECONDARY" {{ c['selector'] }} }))) <= {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -59,7 +59,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -82,7 +82,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -105,7 +105,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -128,7 +128,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -151,7 +151,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -168,13 +168,13 @@ groups:
 {% for user_config in mongodb_exporter_prometheus_rules_config.get('MongodbNumberCursorsOpen', [{}]) %}
   {% set c = _mongodb_exporter_prometheus_rules_default_global | combine(mongodb_exporter_prometheus_rules_config_default['MongodbNumberCursorsOpen']) | combine(user_config) %}
 
-  # alert if Too many cursors opened by MongoDB for clients (> 10k)
+  # alert if Too many cursors opened by MongoDB for customers (> 10k)
   - alert: {{ c['name'] }}
     expr: mongodb_mongod_metrics_cursor_open{state="total_open" {{ c['selector'] }} } > {{ c['threshold'] }}
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -184,7 +184,7 @@ groups:
       {% if prometheus_alerts_uuid != "" %}UUID: {{ prometheus_alerts_uuid }}{% endif %}
 
     annotations:
-      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Too many cursors opened by MongoDB for clients (> {{ c['threshold'] }}) (current value is: {%- raw %}{{ $value }}{% endraw %})'
+      description: '{%- raw %}{{$labels.instance}}{% endraw %}: Too many cursors opened by MongoDB for customers (> {{ c['threshold'] }}) (current value is: {%- raw %}{{ $value }}{% endraw %})'
       summary: '{%- raw %}{{$labels.instance}}{% endraw %}: MongoDB number cursors open'
 {% endfor %}
 
@@ -197,7 +197,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -220,7 +220,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
