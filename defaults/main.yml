@@ -99,19 +99,25 @@ prometheus_telegraf_rules_config_default:
   SesSentQuota:
     name: SesSentQuota
     threshold: 90
+    severity: warning
   SesReputation:
     name: SesReputation
     threshold: 10
+    severity: warning
   EC2CpuCreditBalance:
     name: EC2CpuCreditBalance
     threshold: 25
+    severity: warning
   RDSCpuCreditBalance:
     name: RDSCpuCreditBalance
     threshold: 25
+    severity: warning
   EC2Events:
     name: EC2Events
+    severity: warning
   RDSEvents:
     name: RDSEvents
+    severity: warning
   OpsgenieHeartbeat:
     name: OpsgenieHeartbeat
     receiver: opsgenie_heartbeat
