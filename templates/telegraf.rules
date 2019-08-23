@@ -16,7 +16,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -38,7 +38,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -60,7 +60,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -85,7 +85,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -107,7 +107,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -130,7 +130,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -156,7 +156,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -178,7 +178,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -207,7 +207,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -249,7 +249,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -273,7 +273,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -301,7 +301,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -325,7 +325,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -353,7 +353,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -377,7 +377,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       role: '{{ $labels.role }}'
       env: '{{ $labels.env }}'
@@ -405,7 +405,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%} 
-      customer: '{{ $labels.client }}' 
+      customer: '{{ $labels.customer }}' 
       project: '{{ $labels.project }}' 
       role: '{{ $labels.role }}' 
       env: '{{ $labels.env }}' 
@@ -427,7 +427,7 @@ groups:
     for: {{ c['for'] }}
     labels:
       {% raw -%} 
-      customer: '{{ $labels.client }}' 
+      customer: '{{ $labels.customer }}' 
       project: '{{ $labels.project }}' 
       role: '{{ $labels.role }}' 
       env: '{{ $labels.env }}' 

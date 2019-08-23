@@ -11,7 +11,7 @@ groups:
     expr: prometheus_build_info == 1
     labels:
       {% raw -%}
-      customer: '{{ $labels.client }}'
+      customer: '{{ $labels.customer }}'
       project: '{{ $labels.project }}'
       env: '{{ $labels.env }}'
       {% endraw -%}
