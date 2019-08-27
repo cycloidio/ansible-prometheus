@@ -9,7 +9,7 @@
         return_content: yes
       register: result
       ignore_errors: yes
-      until: result|succeeded
+      until: result is succeeded
       retries: 6
       delay: 10
 
@@ -26,7 +26,7 @@
         return_content: yes
       register: result
       ignore_errors: yes
-      until: result|succeeded
+      until: result is succeeded
       retries: 6
       delay: 10
 
@@ -43,7 +43,7 @@
         return_content: yes
       register: result
       ignore_errors: yes
-      until: result|succeeded
+      until: result is succeeded
       retries: 6
       delay: 10
 
