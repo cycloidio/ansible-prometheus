@@ -2,7 +2,7 @@
 - name: install deps
   package:
     name: "{{ item }}"
-    state: installed
+    state: present
   with_items:
     - unzip
     - jq

@@ -65,7 +65,7 @@
         status_code: "200"
         validate_certs: no
       register: grafana_check
-      until: grafana_check|succeeded
+      until: grafana_check is succeeded
       retries: 60
       delay: 10
 
@@ -94,6 +94,6 @@
         return_content: yes
         force_basic_auth: yes
       ignore_errors: yes
-      when: "result|success and result['content'] == '[]' and install_prometheus"
+      when: "result is success and result['content'] == '[]' and install_prometheus"
 
   when: install_mode == 'docker'
