@@ -151,30 +151,6 @@ prometheus_telegraf_rules_config_default:
     name: RedisMemoryUsageTooHigh
     threshold: 90
 
-  MongodbReplicationLag:
-    name: MongodbReplicationLag
-    threshold: 10
-    severity: warning
-  MongodbReplicationStatus3:
-    name: MongodbReplicationStatus3
-    severity: warning
-  MongodbReplicationStatus6:
-    name: MongodbReplicationStatus6
-    severity: warning
-  MongodbReplicationStatus8:
-    name: MongodbReplicationStatus8
-    severity: warning
-  MongodbReplicationStatus9:
-    name: MongodbReplicationStatus9
-    severity: warning
-  MongodbReplicationStatus10:
-    name: MongodbReplicationStatus10
-    severity: warning
-  MongodbNumberCursorsOpen:
-    name: MongodbNumberCursorsOpen
-    threshold: 10000
-    severity: warning
-
 _prometheus_telegraf_rules_default_global: "{{ prometheus_rules_default_root | combine(prometheus_telegraf_rules_default_global) }}"
 
 # See https://prometheus.io/docs/operating/configuration/#<scrape_config>
