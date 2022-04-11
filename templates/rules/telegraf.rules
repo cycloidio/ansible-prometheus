@@ -364,8 +364,8 @@ groups:
 
     annotations:
     {%- raw %}
-      description: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
-      summary: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
+      description: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.exported_instance_id }} has {{ $value }} scheduled events.'
+      summary: '{{ $labels.instance }} - Aws EC2 instance {{ $labels.exported_instance_id }} has {{ $value }} scheduled events.'
     {% endraw %}
 {% endfor %}
 
@@ -388,8 +388,8 @@ groups:
 
     annotations:
     {%- raw %}
-      description: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
-      summary: '{{ $labels.instance }} - Aws RDS instance {{ $labels.instance_id }} has {{ $value }} scheduled events.'
+      description: '{{ $labels.instance }} - Aws RDS instance {{ $labels.exported_instance_id }} has {{ $value }} scheduled events.'
+      summary: '{{ $labels.instance }} - Aws RDS instance {{ $labels.exported_instance_id }} has {{ $value }} scheduled events.'
     {% endraw %}
 {% endfor %}
 
