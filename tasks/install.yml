@@ -1,4 +1,16 @@
 ---
+# to fix based on this issue https://github.com/geerlingguy/ansible-role-pip/issues/57
+- name: get python3 version installed
+  ansible.builtin.command: python3 --version
+  register: py3ver
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "12"
+
+- name: remove EXTERNALLY-MANAGED if we're on debian12
+  ansible.builtin.file:
+    path: /usr/lib/python3.11/EXTERNALLY-MANAGED
+    state: absent
+  when: py3ver is defined and py3ver.stdout.find("3.11") != -1
+
 - name: install deps
   package:
     name: "{{ item }}"
@@ -6,7 +18,7 @@
   with_items:
     - unzip
     - jq
-    - python-pip
+    - python3-pip
 
 - name: python deps
   pip:
